@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Oct 04 15:42:03 2013
+
+@author: Ruben Baetens
+"""
+
 {1: ['FTE'],
  2: ['Retired'],
  3: ['Unemployed'],
