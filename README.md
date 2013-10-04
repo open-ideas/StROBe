@@ -14,3 +14,10 @@ lighting, space heating settings and domestic hot water redrawals.
 For more information on the implementation, see the [GitHub Wiki]
 (https://github.com/rubenbaetens/ProclivityPy/wiki).
 
+##Example
+
+```python
+family = Household("Example family")
+family.parameterize()
+family.simulate()
+```
