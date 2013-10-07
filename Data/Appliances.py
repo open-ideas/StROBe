@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Oct 04 16:29:03 2013
-
-@author: Ruben Baetens
-"""
-
 {'FridgeFreezer':{'name':'FridgeFreezer','frad':0.46, 'fconv':0.64, 
     'cycle_n':6115.75932851014, 'cycle_length':22, 'cycle_power':190,
     'standby_power':0, 'cal':0.0501456635736654, 'owner':0.651, 
