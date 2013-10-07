@@ -1,5 +1,6 @@
 ProclivityPy
 ============
+> **pro·cliv·i·ty** · prōˈklivətē · *A natural tendency to choose or do something regularly.*
 
 Currently in beta.
 
