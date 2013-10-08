@@ -41,6 +41,14 @@ def startstate(daytype):
     state = get_probability(rand(), probs)
     return int(state)
 
+def transition(daytype, state, time):
+    '''
+    Get next occupancy state in transition from 'state' ending at 'time'.
+    '''
+    probs = daytype['OPM_'+str(state)]
+    newoc = get_probability(rand(), probs[str(time)])
+    return int(newoc)
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
