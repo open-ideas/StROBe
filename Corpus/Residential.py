@@ -8,7 +8,6 @@ Created on Mon October 07 16:16:10 2013
 import random
 import numpy as np
 import os
-import json
 import cPickle
 import time
 
