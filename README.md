@@ -1,6 +1,5 @@
 ProclivityPy
 ============
-> **pro·cliv·i·ty** · prōˈklivətē · *A natural tendency to choose or do something regularly.*
 
 Currently in beta.
 
@@ -15,7 +14,9 @@ lighting, space heating settings and domestic hot water redrawals.
 For more information on the implementation, see the [GitHub Wiki]
 (https://github.com/rubenbaetens/ProclivityPy/wiki).
 
-###Example
+###Dependencies
+
+###Examples
 
 ```python
 family = Household("Example family")
