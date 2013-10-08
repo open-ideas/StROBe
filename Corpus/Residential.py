@@ -123,6 +123,98 @@ class Household(object):
         self.clusters = clusters(self.members)
         # and return
         return None
+
+    def simulate(self):
+        '''
+        The simulate function includes the simulation of the household 
+        occupancies, plug loads, lightinh loads and hot water tappings.
+        '''
+        def __occupancy__(self):
+            '''
+            Simulation of a number of 'nDay' days based on cluster 'BxDict'.
+            - Including weekend days,
+            - starting from a regular monday at 4:00 AM.
+            '''
+            def check(occday, daydict):
+                '''
+                We set a check which becomes True if the simulated day behaves 
+                according to the cluster, as a safety measure for impossible
+                solutions.
+                '''
+                # First we check if the simulated occ-chain has the same shape
+                location = np.zeros(1, dtype=int)
+                reduction = occday[0]*np.ones(1, dtype=int)
+                for i in range(len(occday)-1):
+                    if occday[i+1] != occday[i]:
+                        location = np.append(location, i+1)
+                        reduction = np.append(reduction,occday[i+1])
+                shape = np.array_equal(reduction, daydict['RED'])
+                # And second we see if the chain has nu sub-30 min differences
+                minlength = 99
+                for i in location:
+                    j = 0
+                    while occday[i+j] == occday[i] and i+j < len(occday)-1:
+                        j = j+1
+                    if j < minlength:
+                        minlength = j
+                # and we neglect the very short presences of 20 min or less
+                length = not minlength < 3
+                # both have to be true to allow continuation
+                return shape and length
+        
+            def dayrun(start, daydict):
+                '''
+                Simulation of a single day according to start state 'start'
+                and the stochastics stored in cluster 'BxDict'and daytype 'Bx'.
+                '''
+                # set the default dayCheck at False
+                daycheck = False
+                endtime = datetime.utcnow() + timedelta(seconds = 10)
+                # and then keep simulating a day until True
+                while daycheck == False:
+                    # set start state conditions
+                    tbin = 0
+                    occs = np.zeros(144, dtype=int)
+                    occs[0] = start
+                    t48 = np.array(sorted(list(range(1, 49)) * 3))
+                    dt = duration(daydict, start, t48[0])
+                    # and loop sequentially transition and duration functions
+                    while tbin < 143:
+                        tbin += 1
+                        if dt == 0:
+                            occs[tbin] = transition(daydict, occs[tbin-1], t48[tbin])
+                            dt = duration(daydict, occs[tbin], t48[tbin]) - 1
+                            # -1 is necessary, as the occupancy state already started
+                        else:
+                            occs[tbin] = occs[tbin - 1]
+                            dt += -1
+                    # whereafer we control if this day is ok
+                    daycheck = check(occs, daydict)
+                    # and we include a break if the while takes to long 
+                    if datetime.utcnow() > endtime:
+                        break
+                # and return occs-array if daycheck is ok according to Bx
+                return occs
+    
+            # first we read the stored cluster data for occupancy
+            occ_week = []
+            for member in self.clusters:
+                dataset = dict()
+                for day in ['wkdy','sat','son']:
+                    filnam = 'Occupancies\\'+member[day]+'.py'
+                    dataset[day] = ast.literal_eval(open(filnam).read())
+                # get the first duration of the start state
+                start = startstate(dataset['wkdy'])
+                # and run all three type of days
+                wkdy = dayrun(start, dataset['wkdy'])
+                sat = dayrun(wkdy[-1], dataset['sat'])
+                son = dayrun(sat[-1], dataset['son'])
+                # and concatenate 
+                week = np.concatenate((np.tile(wkdy, 5), sat, son))
+                occ_week.append(week)
+            # go back and store the occupancy states
+            self.occ = occ_week
+            return None
         
 class Appliance(object):
     """
