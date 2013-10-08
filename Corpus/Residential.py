@@ -27,6 +27,12 @@ def get_probability(rnd, prob, p_type='cum'):
         idx += 1
     return idx
 
+def rand():
+    '''
+    Abbreviation for the random.random()-function.
+    '''
+    return random.random()
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
