@@ -124,4 +124,14 @@ class Household(object):
         # and return
         return None
         
-        
+class Appliance(object):
+    """
+    Data records for appliance simulation based on generated activity and
+    occupancy profiles
+    """
+    # All object parameters are given in kwargs
+    def __init__(self, **kwargs):
+        # copy kwargs to object parameters 
+        for (key, value) in kwargs.items():
+            setattr(self, key, value)
+            
