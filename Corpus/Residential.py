@@ -33,6 +33,14 @@ def rand():
     '''
     return random.random()
 
+def startstate(daytype):
+    '''
+    Get the startstate for the first simulation day at 4:00 AM
+    '''
+    probs = [daytype['OSS']['1'], daytype['OSS']['2'], daytype['OSS']['3']]
+    state = get_probability(rand(), probs)
+    return int(state)
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
