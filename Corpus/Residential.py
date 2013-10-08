@@ -49,6 +49,14 @@ def transition(daytype, state, time):
     newoc = get_probability(rand(), probs[str(time)])
     return int(newoc)
 
+def duration(daytype, state, time):
+    '''
+    Get the duration of current 'state' started at 'time'.
+    '''
+    probs = daytype['ODM_'+str(state)]
+    durat = get_probability(rand(), probs[str(time)])
+    return durat
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
