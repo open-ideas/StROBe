@@ -11,51 +11,10 @@ import os
 import cPickle
 import time
 
+import stats
+
 from datetime import timedelta, datetime
 import ast
-
-def get_probability(rnd, prob, p_type='cum'):
-    '''
-    Find the x-value in a given comulative probability 'prob_cum' based on a 
-    given random y-value 'rnd'.
-    '''
-    if p_type != 'cum':
-        prob = np.cumsum(prob)
-        prob /= max(prob)
-    idx = 1
-    while rnd >= prob[idx-1]:
-        idx += 1
-    return idx
-
-def rand():
-    '''
-    Abbreviation for the random.random()-function.
-    '''
-    return random.random()
-
-def startstate(daytype):
-    '''
-    Get the startstate for the first simulation day at 4:00 AM
-    '''
-    probs = [daytype['OSS']['1'], daytype['OSS']['2'], daytype['OSS']['3']]
-    state = get_probability(rand(), probs)
-    return int(state)
-
-def transition(daytype, state, time):
-    '''
-    Get next occupancy state in transition from 'state' ending at 'time'.
-    '''
-    probs = daytype['OPM_'+str(state)]
-    newoc = get_probability(rand(), probs[str(time)])
-    return int(newoc)
-
-def duration(daytype, state, time):
-    '''
-    Get the duration of current 'state' started at 'time'.
-    '''
-    probs = daytype['ODM_'+str(state)]
-    durat = get_probability(rand(), probs[str(time)])
-    return durat
 
 class Household(object):
     '''
@@ -141,7 +100,7 @@ class Household(object):
                     # and loop for every type of day
                     for day in ['wkdy', 'sat', 'son']:
                         prob = dataset[day][ind]
-                        cons = get_probability(rand(), prob, p_type='prob')+3
+                        cons = stats.get_probability(rand(), prob, p_type='prob')+3
                         C.update({day : 'C'+str(cons)})
                     clusters.append(C)
             # and return the list of clusters
@@ -206,13 +165,13 @@ class Household(object):
                     occs = np.zeros(144, dtype=int)
                     occs[0] = start
                     t48 = np.array(sorted(list(range(1, 49)) * 3))
-                    dt = duration(daydict, start, t48[0])
+                    dt = stats.duration(daydict, start, t48[0])
                     # and loop sequentially transition and duration functions
                     while tbin < 143:
                         tbin += 1
                         if dt == 0:
-                            occs[tbin] = transition(daydict, occs[tbin-1], t48[tbin])
-                            dt = duration(daydict, occs[tbin], t48[tbin]) - 1
+                            occs[tbin] = stats.transition(daydict, occs[tbin-1], t48[tbin])
+                            dt = stats.duration(daydict, occs[tbin], t48[tbin]) - 1
                             # -1 is necessary, as the occupancy state already started
                         else:
                             occs[tbin] = occs[tbin - 1]
@@ -233,7 +192,7 @@ class Household(object):
                     filnam = 'Occupancies\\'+member[day]+'.py'
                     dataset[day] = ast.literal_eval(open(filnam).read())
                 # get the first duration of the start state
-                start = startstate(dataset['wkdy'])
+                start = stats.startstate(dataset['wkdy'])
                 # and run all three type of days
                 wkdy = dayrun(start, dataset['wkdy'])
                 sat = dayrun(wkdy[-1], dataset['sat'])
