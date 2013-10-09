@@ -11,7 +11,7 @@ import os
 import cPickle
 import time
 
-import Stats as stats
+import stats
 
 from datetime import timedelta, datetime
 import ast
