@@ -16,6 +16,9 @@ For more information on the implementation, see the [GitHub Wiki]
 
 ###Dependencies
 
+**ProclivityPy** is implemented in Python and uses the packages Os, Numpy, Random, Time, Datetime and Ast, which are
+all generally available.
+
 ###Examples
 
 ```python
