@@ -118,7 +118,7 @@ class Household(object):
         self.day_of_week = self.__chronology__(year)
         self.occ = self.__occupancy__()
 
-    def __chronology__(year):
+    def __chronology__(self, year):
         '''
         A basic internal calendar is made, storing the days and months of the
         depicted simulating year.
@@ -128,14 +128,8 @@ class Household(object):
         fdoy = datetime.datetime(year,1,1).weekday()
         fweek = range(7)[fdoy:]
         # whereafter we fill the complete year
-        day_of_week = fweek + 53*range(7)
-        # depending on whether it is a leap year or not.
-        leap = calendar.isleap(year)
-        if leap:
-            nday = 366
-        else:
-            nday = 365
-        day_of_week = day_of_week[:nday]
+        nday = 366 if calendar.isleap(year) else 355
+        day_of_week = (fweek+53*range(7))[:nday]
         # and return the day_of_week for the entire year
         return day_of_week
 
@@ -201,7 +195,7 @@ class Household(object):
                 # whereafer we control if this day is ok
                 daycheck = check(occs, daydict)
                 # and we include a break if the while takes to long 
-                if datetime.utcnow() > endtime:
+                if datetime.datetime.utcnow() > endtime:
                     break
             # and return occs-array if daycheck is ok according to Bx
             return occs
