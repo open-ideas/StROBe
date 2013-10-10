@@ -113,7 +113,7 @@ class Household(object):
     def simulate(self):
         '''
         The simulate function includes the simulation of the household 
-        occupancies, plug loads, lightinh loads and hot water tappings.
+        occupancies, plug loads, lighting loads and hot water tappings.
         '''
         def __occupancy__(self):
             '''
