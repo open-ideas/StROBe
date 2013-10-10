@@ -7,8 +7,6 @@ Created on Mon October 07 16:16:10 2013
 
 import random
 import numpy as np
-import os
-import cPickle
 import time
 
 import stats
@@ -100,7 +98,7 @@ class Household(object):
                     # and loop for every type of day
                     for day in ['wkdy', 'sat', 'son']:
                         prob = dataset[day][ind]
-                        cons = stats.get_probability(rand(), prob, p_type='prob')+3
+                        cons = stats.get_probability(random.random(), prob, p_type='prob')+3
                         C.update({day : 'C'+str(cons)})
                     clusters.append(C)
             # and return the list of clusters
