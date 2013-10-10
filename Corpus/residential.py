@@ -115,7 +115,8 @@ class Household(object):
         occupancies, plug loads, lighting loads and hot water tappings.
         '''
 
-        self.day_of_week = self.__chronology__(year)
+        self.year = year
+        self.day_of_week, self.nday = self.__chronology__(year)
         self.occ = self.__occupancy__()
 
     def __chronology__(self, year):
@@ -131,7 +132,7 @@ class Household(object):
         nday = 366 if calendar.isleap(year) else 355
         day_of_week = (fweek+53*range(7))[:nday]
         # and return the day_of_week for the entire year
-        return day_of_week
+        return day_of_week, nday
 
     def __occupancy__(self):
         '''
@@ -216,8 +217,14 @@ class Household(object):
             # and concatenate 
             week = np.concatenate((np.tile(wkdy, 5), sat, son))
             occ_week.append(week)
-        # go back and return the occupancy states
-        return occ_week
+        # and combine the occupancy states for the entire year
+        bins = 4*144
+        start, stop = bins*self.day_of_week[0], start+365*self.nday
+        occ_year = []
+        for line in range(len(occ_week)):
+            occ_year.append(np.tile(occ_week,54)[line][start:stop])
+        # and return them to the class object
+        return occ_year
         
 
         
