@@ -23,10 +23,14 @@ class HouseholdTest(unittest.TestCase):
     def test_creation(self):
         test = residential.Household(self.name)
         self.assertEqual(test.name, self.name)
+        self.assertTrue(len(test.apps)!=0)
+        self.assertTrue(len(test.members)!=0)
+        self.assertEqual(len(test.members),len(test.clusters))
 
     def test_simulation(self):
         test = residential.Household('Example')
         test.simulate()
+        self.assertTrue(len(test.occ)!=0)
 
 if __name__ == '__main__':
     suite1 = unittest.TestLoader().loadTestsFromTestCase(HouseholdTest)
