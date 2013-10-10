@@ -12,13 +12,24 @@ import residential
 DIR = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(DIR)+'\\Data')
 
-class TestSequenceHouseholdFunctions(unittest.TestCase):
+class HouseholdTest(unittest.TestCase):
     '''
     Testing the household class.
     '''
-    def CreationAndSimulation(self):
+
+    def setUp(self):
+        self.name = 'Example'
+
+    def test_creation(self):
+        test = residential.Household(self.name)
+        self.assertEqual(test.name, self.name)
+
+    def test_simulation(self):
         test = residential.Household('Example')
         test.simulate()
 
 if __name__ == '__main__':
-    unittest.main()
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(HouseholdTest)
+    #suite2 = ...
+    alltests = unittest.TestSuite([suite1])
+    unittest.TextTestRunner(verbosity=1).run(alltests)
