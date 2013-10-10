@@ -6,14 +6,17 @@ Created on Wed Oct 09 15:36:23 2013
 """
 
 import os
-
-STR = ['\\Corpus','\\Data']
-DIR = os.path.dirname(os.path.realpath(__file__))
-
-os.chdir(os.path.dirname(DIR)+STR[0])
+import unittest
 import residential
 
-os.chdir(os.path.dirname(DIR)+STR[1])
+DIR = os.path.dirname(os.path.realpath(__file__))
+os.chdir(os.path.dirname(DIR)+'\\Data')
 
-test = residential.Household('Example')
-test.simulate()
+class TestSequenceFunctions(unittest.TestCase):
+
+    def CreationAndSimulation(self):
+        test = residential.Household('Example')
+        test.simulate()
+
+if __name__ == '__main__':
+    unittest.main()
