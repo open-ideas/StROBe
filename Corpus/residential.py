@@ -115,7 +115,7 @@ class Household(object):
         The simulate function includes the simulation of the household 
         occupancies, plug loads, lighting loads and hot water tappings.
         '''
-        def __occupancy__(self):
+        def __occupancy__(clusters):
             '''
             Simulation of a number of 'nDay' days based on cluster 'BxDict'.
             - Including weekend days,
@@ -181,10 +181,10 @@ class Household(object):
                         break
                 # and return occs-array if daycheck is ok according to Bx
                 return occs
-    
+
             # first we read the stored cluster data for occupancy
             occ_week = []
-            for member in self.clusters:
+            for member in clusters:
                 dataset = dict()
                 for day in ['wkdy','sat','son']:
                     filnam = 'Occupancies\\'+member[day]+'.py'
@@ -198,9 +198,10 @@ class Household(object):
                 # and concatenate 
                 week = np.concatenate((np.tile(wkdy, 5), sat, son))
                 occ_week.append(week)
-            # go back and store the occupancy states
-            self.occ = occ_week
-            return None
+            # go back and return the occupancy states
+            return occ_week
+        
+        self.occ = __occupancy__(self.clusters)
         
 class Appliance(object):
     """
