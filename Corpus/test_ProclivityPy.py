@@ -12,8 +12,10 @@ import residential
 DIR = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(DIR)+'\\Data')
 
-class TestSequenceFunctions(unittest.TestCase):
-
+class TestSequenceHouseholdFunctions(unittest.TestCase):
+    '''
+    Testing the household class.
+    '''
     def CreationAndSimulation(self):
         test = residential.Household('Example')
         test.simulate()
