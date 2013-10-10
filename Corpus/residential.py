@@ -8,10 +8,9 @@ Created on Mon October 07 16:16:10 2013
 import random
 import numpy as np
 import time
-
 import stats
-
-from datetime import timedelta, datetime
+import datetime
+import calendar
 import ast
 
 class Household(object):
@@ -110,13 +109,35 @@ class Household(object):
         # and return
         return None
 
-    def simulate(self):
+    def simulate(self, year=2013):
         '''
         The simulate function includes the simulation of the household 
         occupancies, plug loads, lighting loads and hot water tappings.
         '''
 
+        self.day_of_week = self.__chronology__(year)
         self.occ = self.__occupancy__()
+
+    def __chronology__(year):
+        '''
+        A basic internal calendar is made, storing the days and months of the
+        depicted simulating year.
+        - Monday == 0 ... Sunday == 6
+        '''
+        # first we determine the first week of the depicted year
+        fdoy = datetime.datetime(year,1,1).weekday()
+        fweek = range(7)[fdoy:]
+        # whereafter we fill the complete year
+        day_of_week = fweek + 53*range(7)
+        # depending on whether it is a leap year or not.
+        leap = calendar.isleap(year)
+        if leap:
+            nday = 366
+        else:
+            nday = 365
+        day_of_week = day_of_week[:nday]
+        # and return the day_of_week for the entire year
+        return day_of_week
 
     def __occupancy__(self):
         '''
@@ -158,7 +179,7 @@ class Household(object):
             '''
             # set the default dayCheck at False
             daycheck = False
-            endtime = datetime.utcnow() + timedelta(seconds = 10)
+            endtime = datetime.datetime.utcnow() + datetime.timedelta(seconds = 10)
             # and then keep simulating a day until True
             while daycheck == False:
                 # set start state conditions
