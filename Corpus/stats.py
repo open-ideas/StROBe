@@ -44,3 +44,45 @@ def duration(daytype, state, time, name='ODM_'):
     probs = daytype[name+str(state)]
     durat = get_probability(random.random(), probs[str(time)])
     return durat
+
+class MCSA(object):
+    '''
+    Monte Carlo Survival Analysis
+    '''
+    # All object parameters are given in kwargs
+    def __init__(self, **kwargs):
+        # copy kwargs to object parameters 
+        for (key, value) in kwargs.items():
+            setattr(self, key, value)        
+
+
+
+class MCdtMc(object):
+    '''
+    Monte Carlo discrete-time Markov chain
+    '''
+    # All object parameters are given in kwargs
+    def __init__(self, **kwargs):
+        # copy kwargs to object parameters 
+        for (key, value) in kwargs.items():
+            setattr(self, key, value)        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
