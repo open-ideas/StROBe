@@ -78,7 +78,7 @@ class Household(object):
             dataset = ast.literal_eval(open('Appliances.py').read())
             app_n = []
             for app in dataset:
-                obj = Appliance(**dataset[app])
+                obj = Equipment(**dataset[app])
                 owner = obj.owner <= random.random()
                 app_n.append(app) if owner else None
             return app_n            
@@ -225,10 +225,8 @@ class Household(object):
             occ_year.append(np.tile(occ_week,54)[line][start:stop])
         # and return them to the class object
         return occ_year
-        
 
-        
-class Appliance(object):
+class Equipment(object):
     """
     Data records for appliance simulation based on generated activity and
     occupancy profiles
@@ -238,4 +236,4 @@ class Appliance(object):
         # copy kwargs to object parameters 
         for (key, value) in kwargs.items():
             setattr(self, key, value)
-            
+
