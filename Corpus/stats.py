@@ -29,7 +29,7 @@ class MCSA(object):
     # All object parameters are given in kwargs
     def __init__(self, cluster, **kwargs):
         # load the dataset of the cluster into ds
-        filnam = 'Occupancies\\'+cluster+'.py'
+        filnam = cluster+'.py'
         ds = ast.literal_eval(open(filnam).read())
         # and add them as class parameters
         self.OSS = ds['OSS']
