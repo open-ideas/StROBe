@@ -261,6 +261,16 @@ class Household(object):
         load = []
         return load
 
+    def __shsetting__(self):
+        '''
+        Simulation of the space heating setting points.
+        - Including weekend days,
+        - starting from a regular monday at 4:00 AM.
+        '''
+
+        setting = []
+        return settings
+
 class Equipment(object):
     '''
     Data records for appliance simulation based on generated activity and
