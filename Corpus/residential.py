@@ -12,6 +12,7 @@ import stats
 import datetime
 import calendar
 import ast
+import os
 
 class Household(object):
     '''
@@ -140,7 +141,7 @@ class Household(object):
         - Including weekend days,
         - starting from a regular monday at 4:00 AM.
         '''
-        def check(occday, daydict):
+        def check(occday, RED):
             '''
             We set a check which becomes True if the simulated day behaves 
             according to the cluster, as a safety measure for impossible
@@ -153,7 +154,7 @@ class Household(object):
                 if occday[i+1] != occday[i]:
                     location = np.append(location, i+1)
                     reduction = np.append(reduction,occday[i+1])
-            shape = np.array_equal(reduction, daydict['RED'])
+            shape = np.array_equal(reduction, RED)
             # And second we see if the chain has nu sub-30 min differences
             minlength = 99
             for i in location:
@@ -166,8 +167,8 @@ class Household(object):
             length = not minlength < 3
             # both have to be true to allow continuation
             return shape and length
-    
-        def dayrun(start, daydict):
+
+        def dayrun(start, cluster):
             '''
             Simulation of a single day according to start state 'start'
             and the stochastics stored in cluster 'BxDict'and daytype 'Bx'.
@@ -176,25 +177,26 @@ class Household(object):
             daycheck = False
             endtime = datetime.datetime.utcnow() + datetime.timedelta(seconds = 10)
             # and then keep simulating a day until True
+            SA = stats.MCSA(cluster)
             while daycheck == False:
                 # set start state conditions
                 tbin = 0
                 occs = np.zeros(144, dtype=int)
                 occs[0] = start
                 t48 = np.array(sorted(list(range(1, 49)) * 3))
-                dt = stats.duration(daydict, start, t48[0])
+                dt = SA.duration(start, t48[0])
                 # and loop sequentially transition and duration functions
                 while tbin < 143:
                     tbin += 1
                     if dt == 0:
-                        occs[tbin] = stats.transition(daydict, occs[tbin-1], t48[tbin])
-                        dt = stats.duration(daydict, occs[tbin], t48[tbin]) - 1
+                        occs[tbin] = SA.transition(occs[tbin-1], t48[tbin])
+                        dt = SA.duration(occs[tbin], t48[tbin]) - 1
                         # -1 is necessary, as the occupancy state already started
                     else:
                         occs[tbin] = occs[tbin - 1]
                         dt += -1
                 # whereafer we control if this day is ok
-                daycheck = check(occs, daydict)
+                daycheck = check(occs, SA.RED)
                 # and we include a break if the while takes to long 
                 if datetime.datetime.utcnow() > endtime:
                     break
@@ -202,18 +204,16 @@ class Household(object):
             return occs
 
         # first we read the stored cluster data for occupancy
+        cdir = os.getcwd()
+        os.chdir(cdir+'\\Occupancies')
         occ_week = []
         for member in self.clusters:
-            dataset = dict()
-            for day in ['wkdy','sat','son']:
-                filnam = 'Occupancies\\'+member[day]+'.py'
-                dataset[day] = ast.literal_eval(open(filnam).read())
             # get the first duration of the start state
-            start = stats.startstate(dataset['wkdy'])
+            start = 2
             # and run all three type of days
-            wkdy = dayrun(start, dataset['wkdy'])
-            sat = dayrun(wkdy[-1], dataset['sat'])
-            son = dayrun(sat[-1], dataset['son'])
+            wkdy = dayrun(start, member['wkdy'])
+            sat = dayrun(wkdy[-1], member['sat'])
+            son = dayrun(sat[-1], member['son'])
             # and concatenate 
             week = np.concatenate((np.tile(wkdy, 5), sat, son))
             occ_week.append(week)
@@ -224,16 +224,16 @@ class Household(object):
         for line in range(len(occ_week)):
             occ_year.append(np.tile(occ_week,54)[line][start:stop])
         # and return them to the class object
+        os.chdir(cdir)
         return occ_year
 
 class Equipment(object):
-    """
+    '''
     Data records for appliance simulation based on generated activity and
     occupancy profiles
-    """
+    '''
     # All object parameters are given in kwargs
     def __init__(self, **kwargs):
         # copy kwargs to object parameters 
         for (key, value) in kwargs.items():
             setattr(self, key, value)
-
