@@ -251,7 +251,15 @@ class Household(object):
         load = []
         return load
 
+    def __dhwload__(self):
+        '''
+        Simulation of the domestic hot water tappings.
+        - Including weekend days,
+        - starting from a regular monday at 4:00 AM.
+        '''
 
+        load = []
+        return load
 
 class Equipment(object):
     '''
