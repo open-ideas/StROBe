@@ -137,7 +137,7 @@ class Household(object):
 
     def __occupancy__(self):
         '''
-        Simulation of a number of 'nDay' days based on cluster 'BxDict'.
+        Simulation of a number of days based on cluster 'BxDict'.
         - Including weekend days,
         - starting from a regular monday at 4:00 AM.
         '''
@@ -226,6 +226,32 @@ class Household(object):
         # and return them to the class object
         os.chdir(cdir)
         return occ_year
+
+    def __plugload__(self):
+        '''
+        Simulation of the electric load based on the occupancies, cluster 
+        and the present appliances.
+        - Including weekend days,
+        - starting from a regular monday at 4:00 AM.
+        '''
+        def receptacles(self):
+            '''
+            Simulation of the receptacle loads.
+            '''
+            load = []
+            return load
+    
+        def lightingload(self):
+            '''
+            Simulation of the loads for lighting.
+            '''
+            load = []
+            return load
+
+        load = []
+        return load
+
+
 
 class Equipment(object):
     '''
