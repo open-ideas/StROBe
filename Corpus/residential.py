@@ -243,8 +243,84 @@ class Household(object):
     
         def lightingload(self):
             '''
-            Simulation of the loads for lighting.
+            Simulate use of lighting for residential buildings based on the 
+            model of J. Widén et al (2009)
             '''
+    
+            occ_merged = merge(self.occ)
+            occ_repeat = np.tile(occ_merged, 53)
+    
+            # parameters ##########################################################
+            # Simulation of lighting load requires information on the irradiance
+            # levels which determin the need for lighting, together with occupancy.
+            # The loaded solar data represent the global horizontal radiation
+            # at a time-step of 1-minute for Uccle, Belgium
+            file = open('Data//Climate//irradiance.txt','r')
+            data_pickle = file.read()
+            file.close()
+            irr = cPickle.loads(data_pickle)
+    
+            # script ##############################################################
+            # a yearly simulation is basic if the model is not used in a unittest
+            minutes = 525600 if not test else 1440
+            days = 365 if not test else 1
+            # the model is found on an ideal power level -power_id- depending on 
+            # irradiance level and occupancy (but not on light switching behavior)
+            time = np.arange(0, (minutes+1)*60, 60)
+            (i, minute) = (-1, -1)
+            (power_max, irr_max) = (200, 200)
+            power_id = np.zeros(minutes+1)
+            for doy in range(0, days):
+                for step in range(0, 144):
+                    i += 1
+                    for run in range(0, 10):
+                        minute += 1
+                        if occ_repeat[i] == 0:
+                            power_id[minute] = 0
+                        elif irr[minute] >= irr_max :
+                            power_id[minute] = 0
+                        else:
+                            power_id[minute] = power_max*(1-irr[minute]/irr_max)
+            # determine all transitions of appliances depending on the appliance
+            # basic properties, ie. stochastic versus cycling power profile
+            (i, j) = (-1, -1)
+            prob_adj = 0.1 # hourly probability to adjust
+            power_adj = 40 # power by which is adjusted
+            power = np.zeros(minutes+1)
+            react = np.zeros(minutes+1)
+            for doy in range(0, days):
+                for step in range(0, 144):
+                    i += 1
+                    for run in range(0, 10):
+                        j += 1
+                        if occ_repeat[i] == 0:
+                            power[j] = power_id[j]
+                        elif random.random() <= prob_adj:
+                            delta_now = power[j-1] - power_id[j]
+                            delta_min = np.abs(power[j-1]-power_adj-power_id[j])
+                            delta_plus = np.abs(power[j-1]+power_adj-power_id[j])
+                            if delta_now > 0 and delta_min < np.abs(delta_now) :
+                                power[j] = power[j-1]-power_adj
+                            elif delta_now < 0 and delta_plus < np.abs(delta_now):
+                                power[j] = power[j-1]+power_adj
+                            else:
+                                power[j] = power[j-1]
+                        else:
+                            power[j] = power[j-1]
+    
+            radi, conv = power*0.55, power*0.45
+    
+            result = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
+                      'QCon':conv, 'Wknds':None, 'mDHW':None}
+    
+            # output ##############################################################
+            # only the power load is returned
+            return result
+
+
+
+
+
             load = []
             return load
 
