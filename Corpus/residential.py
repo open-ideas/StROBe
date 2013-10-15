@@ -13,6 +13,8 @@ import datetime
 import calendar
 import ast
 import os
+import cPickle
+import itertools
 
 class Household(object):
     '''
@@ -98,7 +100,8 @@ class Household(object):
                     # and loop for every type of day
                     for day in ['wkdy', 'sat', 'son']:
                         prob = dataset[day][ind]
-                        cons = stats.get_probability(random.random(), prob, p_type='prob')+3
+                        cons = stats.get_probability(random.random(), 
+                                                     prob, p_type='prob')+3
                         C.update({day : 'C'+str(cons)})
                     clusters.append(C)
             # and return the list of clusters
@@ -117,8 +120,9 @@ class Household(object):
         '''
 
         self.year = year
-        self.day_of_week, self.nday = self.__chronology__(year)
-        self.occ = self.__occupancy__()
+        self.dow, self.nday = self.__chronology__(year)
+        self.occ, self.occ_m = self.__occupancy__()
+        self.test = self.__plugload__()
 
     def __chronology__(self, year):
         '''
@@ -203,6 +207,18 @@ class Household(object):
             # and return occs-array if daycheck is ok according to Bx
             return occs
 
+        def merge(occ):
+            '''
+            Merge the occupancy profiles of all household members to a single
+            profile denoting the number of present people.
+            '''
+            occs = int(3)*np.ones(len(occ[0])) # starting with least active state
+            for member in occ:
+                for to in range(len(member)):
+                    if member[to] < occs[to]:
+                        occs[to] = member[to] 
+            return occs
+
         # first we read the stored cluster data for occupancy
         cdir = os.getcwd()
         os.chdir(cdir+'\\Occupancies')
@@ -217,15 +233,18 @@ class Household(object):
             # and concatenate 
             week = np.concatenate((np.tile(wkdy, 5), sat, son))
             occ_week.append(week)
+        occ_merg = merge(occ_week)
         # and combine the occupancy states for the entire year
         bins = 4*144
-        start, stop = bins*self.day_of_week[0], start+365*self.nday
+        start, stop = bins*self.dow[0], start+365*self.nday
         occ_year = []
         for line in range(len(occ_week)):
             occ_year.append(np.tile(occ_week,54)[line][start:stop])
+        occ_merged = []
+        occ_merged.append(np.tile(occ_merg,54)[start:stop])
         # and return them to the class object
         os.chdir(cdir)
-        return occ_year
+        return occ_year, occ_merged
 
     def __plugload__(self):
         '''
@@ -234,6 +253,7 @@ class Household(object):
         - Including weekend days,
         - starting from a regular monday at 4:00 AM.
         '''
+
         def receptacles(self):
             '''
             Simulation of the receptacle loads.
@@ -247,82 +267,77 @@ class Household(object):
             model of J. Widén et al (2009)
             '''
     
-            occ_merged = merge(self.occ)
-            occ_repeat = np.tile(occ_merged, 53)
-    
-            # parameters ##########################################################
-            # Simulation of lighting load requires information on the irradiance
-            # levels which determin the need for lighting, together with occupancy.
+            # parameters ######################################################
+            # Simulation of lighting load requires information on irradiance
+            # levels which determine the need for lighting if occupant.
             # The loaded solar data represent the global horizontal radiation
             # at a time-step of 1-minute for Uccle, Belgium
-            file = open('Data//Climate//irradiance.txt','r')
+            file = open('Climate//irradiance.txt','r')
             data_pickle = file.read()
             file.close()
             irr = cPickle.loads(data_pickle)
     
-            # script ##############################################################
-            # a yearly simulation is basic if the model is not used in a unittest
-            minutes = 525600 if not test else 1440
-            days = 365 if not test else 1
-            # the model is found on an ideal power level -power_id- depending on 
-            # irradiance level and occupancy (but not on light switching behavior)
+            # script ##########################################################
+            # a yearly simulation is basic, also in a unittest
+            nday = self.nday
+            nbin = 144
+            minutes = self.nday * 1440
+            occ_m = self.occ_m[0]
+            # the model is found on an ideal power level power_id depending on 
+            # irradiance level and occupancy (but not on light switching 
+            # behavior of occupants itself)
             time = np.arange(0, (minutes+1)*60, 60)
-            (i, minute) = (-1, -1)
-            (power_max, irr_max) = (200, 200)
-            power_id = np.zeros(minutes+1)
-            for doy in range(0, days):
-                for step in range(0, 144):
-                    i += 1
-                    for run in range(0, 10):
-                        minute += 1
-                        if occ_repeat[i] == 0:
-                            power_id[minute] = 0
-                        elif irr[minute] >= irr_max :
-                            power_id[minute] = 0
-                        else:
-                            power_id[minute] = power_max*(1-irr[minute]/irr_max)
+            to = -1 # time counter for occupancy
+            tl = -1 # time counter for minutes in lighting load
+            power_max = 200
+            irr_max = 200
+            pow_id = np.zeros(minutes+1)
+            for doy, step in itertools.product(range(nday), range(nbin)):
+                to += 1
+                for run in range(0, 10):
+                    tl += 1
+                    if occ_m[to] == int(1) or (irr[tl] >= irr_max):
+                        pow_id[tl] = 0
+                    else:
+                        pow_id[tl] = power_max*(1 - irr[tl]/irr_max)
             # determine all transitions of appliances depending on the appliance
             # basic properties, ie. stochastic versus cycling power profile
-            (i, j) = (-1, -1)
+            to = -1
+            tl = -1
             prob_adj = 0.1 # hourly probability to adjust
-            power_adj = 40 # power by which is adjusted
+            pow_adj = 40 # power by which is adjusted
             power = np.zeros(minutes+1)
             react = np.zeros(minutes+1)
-            for doy in range(0, days):
-                for step in range(0, 144):
-                    i += 1
-                    for run in range(0, 10):
-                        j += 1
-                        if occ_repeat[i] == 0:
-                            power[j] = power_id[j]
-                        elif random.random() <= prob_adj:
-                            delta_now = power[j-1] - power_id[j]
-                            delta_min = np.abs(power[j-1]-power_adj-power_id[j])
-                            delta_plus = np.abs(power[j-1]+power_adj-power_id[j])
-                            if delta_now > 0 and delta_min < np.abs(delta_now) :
-                                power[j] = power[j-1]-power_adj
-                            elif delta_now < 0 and delta_plus < np.abs(delta_now):
-                                power[j] = power[j-1]+power_adj
-                            else:
-                                power[j] = power[j-1]
+            for doy, step  in itertools.product(range(nday), range(nbin)):
+                to += 1
+                for run in range(0, 10):
+                    tl += 1
+                    if occ_m[to] == 0:
+                        power[tl] = pow_id[tl]
+                    elif random.random() <= prob_adj:
+                        delta = power[tl-1] - pow_id[tl]
+                        delta_min = np.abs(delta - pow_adj)
+                        delta_plus = np.abs(delta + pow_adj)
+                        if delta > 0 and delta_min < np.abs(delta) :
+                            power[tl] = power[tl-1]-pow_adj
+                        elif delta < 0 and delta_plus < np.abs(delta):
+                            power[tl] = power[tl-1]+pow_adj
                         else:
-                            power[j] = power[j-1]
+                            power[tl] = power[tl-1]
+                    else:
+                        power[tl] = power[tl-1]
     
             radi, conv = power*0.55, power*0.45
     
             result = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
                       'QCon':conv, 'Wknds':None, 'mDHW':None}
     
-            # output ##############################################################
+            # output ##########################################################
             # only the power load is returned
             return result
 
-
-
-
-
-            load = []
-            return load
+        result = lightingload(self)
+        print result['P']
 
         load = []
         return load
@@ -345,7 +360,7 @@ class Household(object):
         '''
 
         setting = []
-        return settings
+        return setting
 
 class Equipment(object):
     '''
