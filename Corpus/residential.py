@@ -152,13 +152,15 @@ class Household(object):
             solutions.
             '''
             # First we check if the simulated occ-chain has the same shape
-            location = np.zeros(1, dtype=int)
-            reduction = occday[0]*np.ones(1, dtype=int)
-            for i in range(len(occday)-1):
-                if occday[i+1] != occday[i]:
-                    location = np.append(location, i+1)
-                    reduction = np.append(reduction,occday[i+1])
-            shape = np.array_equal(reduction, RED)
+            shape = True
+            if min_form:
+                location = np.zeros(1, dtype=int)
+                reduction = occday[0]*np.ones(1, dtype=int)
+                for i in range(len(occday)-1):
+                    if occday[i+1] != occday[i]:
+                        location = np.append(location, i+1)
+                        reduction = np.append(reduction,occday[i+1])
+                shape = np.array_equal(reduction, RED)
             # And second we see if the chain has nu sub-30 min differences
             length = True
             if min_time:
