@@ -151,6 +151,8 @@ class Household(object):
             according to the cluster, as a safety measure for impossible
             solutions.
             '''
+
+            # script 1 ########################################################
             # First we check if the simulated occ-chain has the same shape
             shape = True
             if min_form:
@@ -161,6 +163,8 @@ class Household(object):
                         location = np.append(location, i+1)
                         reduction = np.append(reduction,occday[i+1])
                 shape = np.array_equal(reduction, RED)
+
+            # script 2 ########################################################
             # And second we see if the chain has nu sub-30 min differences
             length = True
             if min_time:
@@ -173,7 +177,9 @@ class Household(object):
                         minlength = j
                 # and we neglect the very short presences of 20 min or less
                 length = not minlength < 3
-            # both have to be true to allow continuation
+
+            # output ##########################################################
+            # both have to be true to allow continuation, and we return boolean
             return shape and length
 
         def dayrun(start, cluster):
@@ -181,11 +187,17 @@ class Household(object):
             Simulation of a single day according to start state 'start'
             and the stochastics stored in cluster 'BxDict'and daytype 'Bx'.
             '''
-            # set the default dayCheck at False
+
+            # script ##########################################################
+            # we set the default daycheck at False for the first run and loop
+            # creating days while False, meaning while the simulated day does
+            # not correspond to the agreed-on rules in check().
             daycheck = False
-            endtime = datetime.datetime.utcnow() + datetime.timedelta(seconds = 10)
-            # and then keep simulating a day until True
+            end = datetime.datetime.utcnow() + datetime.timedelta(seconds = 10)
+            # defin the corresponding MCSA object from stats.py depicting a 
+            # Monte Carlo Survival Analysis object.
             SA = stats.MCSA(cluster)
+            # and then keep simulating a day until True
             while daycheck == False:
                 # set start state conditions
                 tbin = 0
@@ -205,48 +217,67 @@ class Household(object):
                         dt += -1
                 # whereafer we control if this day is ok
                 daycheck = check(occs, SA.RED)
-                # and we include a break if the while takes to long 
-                if datetime.datetime.utcnow() > endtime:
+                # and we include a break if the while-loop takes to long until
+                # check()-conditions are fulfilled.
+                if datetime.datetime.utcnow() > end:
                     break
-            # and return occs-array if daycheck is ok according to Bx
+
+            # ouput ###########################################################
+            # return occupants array if daycheck is ok according to Bx
             return occs
 
         def merge(occ):
             '''
             Merge the occupancy profiles of all household members to a single
-            profile denoting the number of present people.
+            profile denoting the most active state of all members.
             '''
-            occs = int(3)*np.ones(len(occ[0])) # starting with least active state
+            # scirpt ##########################################################
+            # We start defining an array of correct length filled with the 
+            # least active state and loop to see if more-active people are
+            # present at the depicted moment.
+            occs = int(3)*np.ones(len(occ[0]))
             for member in occ:
                 for to in range(len(member)):
                     if member[to] < occs[to]:
                         occs[to] = member[to] 
+
+            # ouput ###########################################################
+            # return the merge occupancy states
             return occs
 
-        # first we read the stored cluster data for occupancy
+        # script ##############################################################
+        # We change the directory to to location where the data is stored,
+        # and run the three type of days, ie. wkdy, sat and son succesively
+        # by which we can create a typical week.
         cdir = os.getcwd()
         os.chdir(cdir+'\\Occupancies')
         occ_week = []
         for member in self.clusters:
-            # get the first duration of the start state
-            start = 2
-            # and run all three type of days
-            wkdy = dayrun(start, member['wkdy'])
+            startstate = 2 #4.00 AM
+            wkdy = dayrun(startstate, member['wkdy'])
             sat = dayrun(wkdy[-1], member['sat'])
             son = dayrun(sat[-1], member['son'])
             # and concatenate 
             week = np.concatenate((np.tile(wkdy, 5), sat, son))
             occ_week.append(week)
+        # A merge occupancy is created depicted the most active state of all
+        # household members, later-on used for set-point temperatures.
         occ_merg = merge(occ_week)
-        # and combine the occupancy states for the entire year
-        bins = 4*144
-        start, stop = bins*self.dow[0], start+365*self.nday
+        # and combine the weekly occupancy states for the entire year by 
+        # repeating them every week and correcting for the first day of year,
+        # including for the merged occupancy.
+        bins = 144
+        tstart = bins*self.dow[0]
+        tstop = tstart + bins*self.nday
         occ_year = []
         for line in range(len(occ_week)):
-            occ_year.append(np.tile(occ_week,54)[line][start:stop])
+            occ_year.append(np.tile(occ_week,54)[line][tstart:tstop])
         occ_merged = []
-        occ_merged.append(np.tile(occ_merg,54)[start:stop])
-        # and return them to the class object
+        occ_merged.append(np.tile(occ_merg,54)[tstart:tstop])
+
+        # output ##############################################################
+        # chdir back to original and return the occupancy states to the class
+        # object.
         os.chdir(cdir)
         return occ_year, occ_merged
 
