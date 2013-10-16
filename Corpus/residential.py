@@ -139,13 +139,13 @@ class Household(object):
         # and return the day_of_week for the entire year
         return day_of_week, nday
 
-    def __occupancy__(self):
+    def __occupancy__(self, min_form = True, min_time = False):
         '''
         Simulation of a number of days based on cluster 'BxDict'.
         - Including weekend days,
         - starting from a regular monday at 4:00 AM.
         '''
-        def check(occday, RED):
+        def check(occday, RED, min_form = True, min_time = False):
             '''
             We set a check which becomes True if the simulated day behaves 
             according to the cluster, as a safety measure for impossible
@@ -160,15 +160,17 @@ class Household(object):
                     reduction = np.append(reduction,occday[i+1])
             shape = np.array_equal(reduction, RED)
             # And second we see if the chain has nu sub-30 min differences
-            minlength = 99
-            for i in location:
-                j = 0
-                while occday[i+j] == occday[i] and i+j < len(occday)-1:
-                    j = j+1
-                if j < minlength:
-                    minlength = j
-            # and we neglect the very short presences of 20 min or less
-            length = not minlength < 3
+            length = True
+            if min_time:
+                minlength = 99
+                for i in location:
+                    j = 0
+                    while occday[i+j] == occday[i] and i+j < len(occday)-1:
+                        j = j+1
+                    if j < minlength:
+                        minlength = j
+                # and we neglect the very short presences of 20 min or less
+                length = not minlength < 3
             # both have to be true to allow continuation
             return shape and length
 
