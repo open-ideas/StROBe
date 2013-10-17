@@ -398,6 +398,13 @@ class Household(object):
         setting = []
         return setting
 
+    def output(self):
+        '''
+        Create proper output files for IDEAS simulations.
+        '''
+        
+        return None
+
 class Equipment(object):
     '''
     Data records for appliance simulation based on generated activity and
