@@ -30,8 +30,9 @@ class Household(object):
     
     def __init__(self, name, **kwargs):
         '''
-        Initiation of Househod object.
+        Initiation of Household object.
         '''
+        # input ###############################################################
         # check on correct parameter input for use of functions as name should
         # be a string.
         try:
@@ -43,13 +44,19 @@ class Household(object):
         self.creation = time.asctime()
         self.name = name
         self.parameterize()
+        print 'Household-object created and parameterized.'
+        print ' - Employment types are %s' % str(self.members)
+        summary = [] #loop dics and remove dubbles
+        for member in self.clusters:
+            summary += member.values()
+        print ' - Set of clusters is %s \n' % str(list(set(summary)))
 
     def parameterize(self, **kwargs):
         '''
         Get a household definition for occupants and present appliances based
         on average statistics or the given kwargs.
         '''
-        # get the occupant types
+
         def members(**kwargs):
             '''
             Define the employment type of all household members based on time
@@ -67,10 +74,9 @@ class Household(object):
                 dataset = ast.literal_eval(open('Households.py').read())
                 key = random.randint(0,len(dataset))
                 members = dataset[key]
-                print 'Household members employment are %s' % str(members)
             # And return the members as list fo strings
             return members
-        # get the available appliances
+
         def appliances():
             '''
             Define the pressent household appliances based on average national
@@ -85,7 +91,7 @@ class Household(object):
                 owner = obj.owner <= random.random()
                 app_n.append(app) if owner else None
             return app_n            
-        # and allocate the householdmembers to clusters
+
         def clusters(members):
             '''
             Allocate each household member to the correct cluster based on the 
