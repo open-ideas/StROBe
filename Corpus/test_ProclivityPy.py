@@ -20,8 +20,15 @@ class HouseholdTest(unittest.TestCase):
     def setUp(self):
         self.name = 'Example'
 
-    def test_creation(self):
+    def test_creation_1(self):
         test = residential.Household(self.name)
+        self.assertEqual(test.name, self.name)
+        self.assertTrue(len(test.apps)!=0)
+        self.assertTrue(len(test.members)!=0)
+        self.assertTrue(len(test.clusters)!=0)
+
+    def test_creation_2(self):
+        test = residential.Household(self.name, members=['FTE','PTE'])
         self.assertEqual(test.name, self.name)
         self.assertTrue(len(test.apps)!=0)
         self.assertTrue(len(test.members)!=0)
