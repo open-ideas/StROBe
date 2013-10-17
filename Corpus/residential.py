@@ -333,6 +333,10 @@ class Household(object):
             power_max = 200
             irr_max = 200
             pow_id = np.zeros(minutes+1)
+            prob_adj = 0.1 # hourly probability to adjust
+            pow_adj = 40 # power by which is adjusted
+            power = np.zeros(minutes+1)
+            react = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
                 to += 1
                 for run in range(0, 10):
@@ -341,18 +345,9 @@ class Household(object):
                         pow_id[tl] = 0
                     else:
                         pow_id[tl] = power_max*(1 - irr[tl]/irr_max)
-            # determine all transitions of appliances depending on the appliance
-            # basic properties, ie. stochastic versus cycling power profile
-            to = -1
-            tl = -1
-            prob_adj = 0.1 # hourly probability to adjust
-            pow_adj = 40 # power by which is adjusted
-            power = np.zeros(minutes+1)
-            react = np.zeros(minutes+1)
-            for doy, step  in itertools.product(range(nday), range(nbin)):
-                to += 1
-                for run in range(0, 10):
-                    tl += 1
+                    # determine all transitions of appliances depending on 
+                    # the appliance basic properties, ie. stochastic versus 
+                    # cycling power profile
                     if occ_m[to] == 0:
                         power[tl] = pow_id[tl]
                     elif random.random() <= prob_adj:
