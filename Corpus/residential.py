@@ -128,7 +128,7 @@ class Household(object):
         self.year = year
         self.dow, self.nday = self.__chronology__(year)
         self.occ, self.occ_m = self.__occupancy__()
-        self.test = self.__plugload__()
+        self.l_receptacles, self.l_lighting = self.__plugload__()
 
     def __chronology__(self, year):
         '''
@@ -363,20 +363,20 @@ class Household(object):
                     else:
                         power[tl] = power[tl-1]
     
-            radi, conv = power*0.55, power*0.45
+            radi = power*0.55
+            conv = power*0.45
     
-            result = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
-                      'QCon':conv, 'Wknds':None, 'mDHW':None}
+            result = {'time':time, 'P':power, 'Q':react, 'QRad':radi, 
+                      'QCon':conv}
     
             # output ##########################################################
             # only the power load is returned
             return result
 
-        result = lightingload(self)
-        print result['P']
+        rec = receptacles(self)
+        lig = lightingload(self)
 
-        load = []
-        return load
+        return rec, lig
 
     def __dhwload__(self):
         '''
