@@ -304,79 +304,37 @@ class Household(object):
             Simulation of the receptacle loads.
             '''
 
-            def stochastic(app, wknds, occ, test):
-                '''
-                Simulate non-cycling appliances based on occupancy and the model 
-                and Markov state-space of Richardson et al.
-                '''
-                act = app.activity
-                len_cycle = app.cycle_length
-                if act not in ('None','Presence'):
-                    actdata = StateSpace(filename=act) 
-                else:
-                    actdata = None
-                idx = -1
-                left = -1
-                minute = -1
-                minutes = 525600 if not test else 1440
-                days = 365 if not test else 1
-                power = np.zeros(minutes+1)
-                for doy in range(0, days):
-                    for step in range(0, 144):
-                        idx += 1
-                        for run in range(0, 10):
-                            minute += 1
-                            # check if this appliance is already on
-                            if left <= 0:
-                                # determine possibilities
-                                if act == 'None':
-                                    prob = 1
-                                elif act == 'Presence':
-                                    prob = occ[idx]
-                                elif wknds[idx] == 1:
-                                    occs = 1 if occ[idx] != 0 else 0
-                                    prob = occs * actdata.prob_we[step][int(occ[idx])]
-                                else:
-                                    occs = 1 if occ[idx] != 0 else 0
-                                    prob = occs * actdata.prob_wd[step][int(occ[idx])]
-                                # check if there is a statechange in the appliance
-                                if random.random() < prob * app.cal:
-                                    left = random.gauss(len_cycle, len_cycle/10)
-                                    power[minute] += app.standby_power
-                            else:
-                                left += -1
-                                power[minute] += app.cycle_power
-                                
-                radi, conv = power*app.frad, power*app.fconv
-                                
-                return power, radi, conv
+            wknds = self.doy > 4
     
-            def cycle(app, test):
-                '''
-                Simulate cycling appliances, eg. fridges and freezers based on
-                average clycle length
-                '''
-                
-                minutes = 525600 if not test else 1440
-                power = np.zeros(minutes+1)
-                left = random.gauss(app.delay, app.delay/4)
-                len_cycle = app.cycle_length
-                for minute in range(0, minutes+1):
-                    if left <= 0:
-                        left += len_cycle
-                        power[minute] = app.cycle_power
-                    else:
-                        left += -1
-                        power[minute] = app.standby_power
+            cwd = os.getcwd()
+            os.chdir(r'E:\3_PhD\6_Python\IDEAS')
+            dataset = ast.literal_eval(open('Appliances.py').read())
+            # define number of minutes
+            nmin = self.nday * 1440
+            # determine all transitions of the appliances depending on the appliance
+            # basic properties, ie. stochastic versus cycling power profile
+            power = np.zeros(nmin+1)
+            radi = np.zeros(nmin+1)
+            conv = np.zeros(nmin+1)
+            for app in self.apps:
+                # create the equipment object with data from dataset.py
+                eq = Equipment(**dataset[app])
+                r_app = eq.simulate(eq, wknds, self.occ_m)
+                power += r_app['p']
+                radi += r_app['r']
+                conv += r_app['c']
+            # a new time axis for power output is to be created as a different time
+            # step is used in comparison to occupancy
+            time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
     
-                radi, conv = power*app.frad, power*app.fconv
-                                
-                return power, radi, conv
+            react = np.zeros(nmin+1)
+    
+            self.r_receptacles = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
+                      'QCon':conv, 'Wknds':None, 'mDHW':None}
+            # go back and return the occupancy states
+            os.chdir(cwd)
 
-
-
-            load = []
-            return load
+            return None
     
         def lightingload(self):
             '''
@@ -492,3 +450,81 @@ class Equipment(object):
         # copy kwargs to object parameters 
         for (key, value) in kwargs.items():
             setattr(self, key, value)
+
+    def simulate(self, wknds, occ_m):
+
+        def stochastic(app, wknds, occ, test):
+            '''
+            Simulate non-cycling appliances based on occupancy and the model 
+            and Markov state-space of Richardson et al.
+            '''
+            act = app.activity
+            len_cycle = app.cycle_length
+            if act not in ('None','Presence'):
+                actdata = StateSpace(filename=act) 
+            else:
+                actdata = None
+            idx = -1
+            left = -1
+            minute = -1
+            minutes = 525600 if not test else 1440
+            days = 365 if not test else 1
+            power = np.zeros(minutes+1)
+            for doy in range(0, days):
+                for step in range(0, 144):
+                    idx += 1
+                    for run in range(0, 10):
+                        minute += 1
+                        # check if this appliance is already on
+                        if left <= 0:
+                            # determine possibilities
+                            if act == 'None':
+                                prob = 1
+                            elif act == 'Presence':
+                                prob = occ[idx]
+                            elif wknds[idx] == 1:
+                                occs = 1 if occ[idx] != 0 else 0
+                                prob = occs * actdata.prob_we[step][int(occ[idx])]
+                            else:
+                                occs = 1 if occ[idx] != 0 else 0
+                                prob = occs * actdata.prob_wd[step][int(occ[idx])]
+                            # check if there is a statechange in the appliance
+                            if random.random() < prob * app.cal:
+                                left = random.gauss(len_cycle, len_cycle/10)
+                                power[minute] += app.standby_power
+                        else:
+                            left += -1
+                            power[minute] += app.cycle_power
+
+            r_app = {'p':power, 'r': power*app.frad, 'c':power*app.fconv}
+                            
+            return r_app
+
+        def cycle(app, test):
+            '''
+            Simulate cycling appliances, eg. fridges and freezers based on
+            average clycle length
+            '''
+            
+            minutes = 525600 if not test else 1440
+            power = np.zeros(minutes+1)
+            left = random.gauss(app.delay, app.delay/4)
+            len_cycle = app.cycle_length
+            for minute in range(0, minutes+1):
+                if left <= 0:
+                    left += len_cycle
+                    power[minute] = app.cycle_power
+                else:
+                    left += -1
+                    power[minute] = app.standby_power
+                    
+            r_app = {'p':power, 'r': power*app.frad, 'c':power*app.fconv}
+                            
+            return r_app
+
+        if self.delay == 0:
+            r_app = stochastic(self, wknds, occ_m)
+        else:
+            r_app = cycle(self)
+            
+        return r_app
