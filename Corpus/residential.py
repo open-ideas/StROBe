@@ -126,9 +126,9 @@ class Household(object):
         '''
 
         self.year = year
-        self.dow, self.nday = self.__chronology__(year)
-        self.occ, self.occ_m = self.__occupancy__()
-        self.l_receptacles, self.l_lighting = self.__plugload__()
+        self.__chronology__(year)
+        self.__occupancy__()
+        self.__plugload__()
 
     def __chronology__(self, year):
         '''
@@ -143,7 +143,9 @@ class Household(object):
         nday = 366 if calendar.isleap(year) else 355
         day_of_week = (fweek+53*range(7))[:nday]
         # and return the day_of_week for the entire year
-        return day_of_week, nday
+        self.dow = day_of_week
+        self.nday = nday
+        return None
 
     def __occupancy__(self, min_form = True, min_time = False):
         '''
@@ -285,7 +287,9 @@ class Household(object):
         # chdir back to original and return the occupancy states to the class
         # object.
         os.chdir(cdir)
-        return occ_year, occ_merged
+        self.occ = occ_year
+        self.occ_m = occ_merged
+        return None
 
     def __plugload__(self):
         '''
@@ -299,6 +303,78 @@ class Household(object):
             '''
             Simulation of the receptacle loads.
             '''
+
+            def stochastic(app, wknds, occ, test):
+                '''
+                Simulate non-cycling appliances based on occupancy and the model 
+                and Markov state-space of Richardson et al.
+                '''
+                act = app.activity
+                len_cycle = app.cycle_length
+                if act not in ('None','Presence'):
+                    actdata = StateSpace(filename=act) 
+                else:
+                    actdata = None
+                idx = -1
+                left = -1
+                minute = -1
+                minutes = 525600 if not test else 1440
+                days = 365 if not test else 1
+                power = np.zeros(minutes+1)
+                for doy in range(0, days):
+                    for step in range(0, 144):
+                        idx += 1
+                        for run in range(0, 10):
+                            minute += 1
+                            # check if this appliance is already on
+                            if left <= 0:
+                                # determine possibilities
+                                if act == 'None':
+                                    prob = 1
+                                elif act == 'Presence':
+                                    prob = occ[idx]
+                                elif wknds[idx] == 1:
+                                    occs = 1 if occ[idx] != 0 else 0
+                                    prob = occs * actdata.prob_we[step][int(occ[idx])]
+                                else:
+                                    occs = 1 if occ[idx] != 0 else 0
+                                    prob = occs * actdata.prob_wd[step][int(occ[idx])]
+                                # check if there is a statechange in the appliance
+                                if random.random() < prob * app.cal:
+                                    left = random.gauss(len_cycle, len_cycle/10)
+                                    power[minute] += app.standby_power
+                            else:
+                                left += -1
+                                power[minute] += app.cycle_power
+                                
+                radi, conv = power*app.frad, power*app.fconv
+                                
+                return power, radi, conv
+    
+            def cycle(app, test):
+                '''
+                Simulate cycling appliances, eg. fridges and freezers based on
+                average clycle length
+                '''
+                
+                minutes = 525600 if not test else 1440
+                power = np.zeros(minutes+1)
+                left = random.gauss(app.delay, app.delay/4)
+                len_cycle = app.cycle_length
+                for minute in range(0, minutes+1):
+                    if left <= 0:
+                        left += len_cycle
+                        power[minute] = app.cycle_power
+                    else:
+                        left += -1
+                        power[minute] = app.standby_power
+    
+                radi, conv = power*app.frad, power*app.fconv
+                                
+                return power, radi, conv
+
+
+
             load = []
             return load
     
@@ -368,15 +444,16 @@ class Household(object):
     
             result = {'time':time, 'P':power, 'Q':react, 'QRad':radi, 
                       'QCon':conv}
-    
+
+            self.d_lighting = result    
             # output ##########################################################
             # only the power load is returned
-            return result
+            return None
 
-        rec = receptacles(self)
-        lig = lightingload(self)
+        receptacles(self)
+        lightingload(self)
 
-        return rec, lig
+        return None
 
     def __dhwload__(self):
         '''
