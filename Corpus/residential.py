@@ -456,10 +456,9 @@ class Equipment(object):
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
             '''
-            act = self.activity
             len_cycle = self.cycle_length
-            if act not in ('None','Presence'):
-                actdata = stats.DTMC(filename=act) 
+            if self.activity not in ('None','Presence'):
+                actdata = stats.DTMC(name=self.activity) 
             else:
                 actdata = None
             to = -1
@@ -474,17 +473,21 @@ class Equipment(object):
                     tl += 1
                     # check if this appliance is already on
                     if left <= 0:
-                        # determine possibilities
-                        if act == 'None':
+                        # determine possibilities based on the required
+                        # activities, starting with no acts required
+                        if self.activity == 'None':
                             prob = 1
-                        elif act == 'Presence':
+                        # continuing with only presence required,
+                        elif self.activity == 'Presence':
                             prob = occ[to]
+                        # and then real activities in weekend and
                         elif dow[to] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_we[step][int(occ[to])]
+                            prob = occs * actdata.prob_we[step][occ[to]]
+                        # on workday
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_wd[step][int(occ[to])]
+                            prob = occs * actdata.prob_wd[step][occ[to]]
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)
@@ -506,10 +509,9 @@ class Equipment(object):
             nbin = nday*24*60
             power = np.zeros(nbin+1)
             left = random.gauss(self.delay, self.delay/4)
-            len_cycle = self.cycle_length
             for minute in range(nbin+1):
                 if left <= 0:
-                    left += len_cycle
+                    left += self.cycle_length
                     power[minute] = self.cycle_power
                 else:
                     left += -1
