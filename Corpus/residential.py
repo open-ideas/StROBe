@@ -304,8 +304,6 @@ class Household(object):
             Simulation of the receptacle loads.
             '''
 
-            wknds = self.doy > 4
-    
             cwd = os.getcwd()
             os.chdir(r'E:\3_PhD\6_Python\IDEAS')
             dataset = ast.literal_eval(open('Appliances.py').read())
@@ -319,7 +317,7 @@ class Household(object):
             for app in self.apps:
                 # create the equipment object with data from dataset.py
                 eq = Equipment(**dataset[app])
-                r_app = eq.simulate(eq, wknds, self.occ_m)
+                r_app = eq.simulate(self.doy, self.clusters, self.occ_m)
                 power += r_app['p']
                 radi += r_app['r']
                 conv += r_app['c']
@@ -451,80 +449,79 @@ class Equipment(object):
         for (key, value) in kwargs.items():
             setattr(self, key, value)
 
-    def simulate(self, wknds, occ_m):
+    def simulate(self, nday, dow, cluster, occ):
 
-        def stochastic(app, wknds, occ, test):
+        def stochastic(self, nday, dow, cluster, occ):
             '''
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
             '''
-            act = app.activity
-            len_cycle = app.cycle_length
+            act = self.activity
+            len_cycle = self.cycle_length
             if act not in ('None','Presence'):
-                actdata = StateSpace(filename=act) 
+                actdata = stats.DTMC(filename=act) 
             else:
                 actdata = None
-            idx = -1
+            to = -1
+            tl = -1
             left = -1
-            minute = -1
-            minutes = 525600 if not test else 1440
-            days = 365 if not test else 1
+            nbin = 144
+            minutes = nday*24*60
             power = np.zeros(minutes+1)
-            for doy in range(0, days):
-                for step in range(0, 144):
-                    idx += 1
-                    for run in range(0, 10):
-                        minute += 1
-                        # check if this appliance is already on
-                        if left <= 0:
-                            # determine possibilities
-                            if act == 'None':
-                                prob = 1
-                            elif act == 'Presence':
-                                prob = occ[idx]
-                            elif wknds[idx] == 1:
-                                occs = 1 if occ[idx] != 0 else 0
-                                prob = occs * actdata.prob_we[step][int(occ[idx])]
-                            else:
-                                occs = 1 if occ[idx] != 0 else 0
-                                prob = occs * actdata.prob_wd[step][int(occ[idx])]
-                            # check if there is a statechange in the appliance
-                            if random.random() < prob * app.cal:
-                                left = random.gauss(len_cycle, len_cycle/10)
-                                power[minute] += app.standby_power
+            for doy, step in itertools.product(range(nday), range(nbin)):
+                to += 1
+                for run in range(10):
+                    tl += 1
+                    # check if this appliance is already on
+                    if left <= 0:
+                        # determine possibilities
+                        if act == 'None':
+                            prob = 1
+                        elif act == 'Presence':
+                            prob = occ[to]
+                        elif dow[to] > 4:
+                            occs = 1 if occ[to] == 1 else 0
+                            prob = occs * actdata.prob_we[step][int(occ[to])]
                         else:
-                            left += -1
-                            power[minute] += app.cycle_power
+                            occs = 1 if occ[to] == 1 else 0
+                            prob = occs * actdata.prob_wd[step][int(occ[to])]
+                        # check if there is a statechange in the appliance
+                        if random.random() < prob * self.cal:
+                            left = random.gauss(len_cycle, len_cycle/10)
+                            power[tl] += self.standby_power
+                    else:
+                        left += -1
+                        power[tl] += self.cycle_power
 
-            r_app = {'p':power, 'r': power*app.frad, 'c':power*app.fconv}
+            r_app = {'p':power, 'r': power*self.frad, 'c':power*self.fconv}
                             
             return r_app
 
-        def cycle(app, test):
+        def cycle(self, nday):
             '''
             Simulate cycling appliances, eg. fridges and freezers based on
             average clycle length
             '''
             
-            minutes = 525600 if not test else 1440
-            power = np.zeros(minutes+1)
-            left = random.gauss(app.delay, app.delay/4)
-            len_cycle = app.cycle_length
-            for minute in range(0, minutes+1):
+            nbin = nday*24*60
+            power = np.zeros(nbin+1)
+            left = random.gauss(self.delay, self.delay/4)
+            len_cycle = self.cycle_length
+            for minute in range(nbin+1):
                 if left <= 0:
                     left += len_cycle
-                    power[minute] = app.cycle_power
+                    power[minute] = self.cycle_power
                 else:
                     left += -1
-                    power[minute] = app.standby_power
+                    power[minute] = self.standby_power
                     
-            r_app = {'p':power, 'r': power*app.frad, 'c':power*app.fconv}
+            r_app = {'p':power, 'r': power*self.frad, 'c':power*self.fconv}
                             
             return r_app
 
         if self.delay == 0:
-            r_app = stochastic(self, wknds, occ_m)
+            r_app = stochastic(self, nday, dow, cluster, occ)
         else:
-            r_app = cycle(self)
+            r_app = cycle(self, nday)
             
         return r_app
