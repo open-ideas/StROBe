@@ -73,27 +73,14 @@ class DTMC(object):
     The DTMC class defines a Discrete-Time Markov Chain
     '''
     # All object parameters are given in kwargs
-    def __init__(self, **kwargs):
-        # copy kwargs to object parameters 
-        for (key, value) in kwargs.items():
-            setattr(self, key, value)        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def __init__(self, cluster, **kwargs):
+        # load the dataset of the cluster into ds
+        filnam = cluster+'.py'
+        ds = ast.literal_eval(open(filnam).read())
+        # and add them as class parameters
+        self.period = ds['period']
+        self.steps = ds['steps']
+        self.occ_n = ds['occ_n']
+        self.prob_wd = ds['prob_wd']
+        self.prob_we = ds['prob_we']
 
