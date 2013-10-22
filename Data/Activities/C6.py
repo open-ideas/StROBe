@@ -1,0 +1,1 @@
+{'period':600, 'steps':144, 'prob_wd':np.zeros(144), 'prob_we':np.zeros(144)}
