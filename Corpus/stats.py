@@ -80,7 +80,6 @@ class DTMC(object):
         # and add them as class parameters
         self.period = ds['period']
         self.steps = ds['steps']
-        self.occ_n = ds['occ_n']
         self.prob_wd = ds['prob_wd']
         self.prob_we = ds['prob_we']
 
