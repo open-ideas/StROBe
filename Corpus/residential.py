@@ -140,7 +140,7 @@ class Household(object):
         fdoy = datetime.datetime(year,1,1).weekday()
         fweek = range(7)[fdoy:]
         # whereafter we fill the complete year
-        nday = 366 if calendar.isleap(year) else 355
+        nday = 366 if calendar.isleap(year) else 365
         day_of_week = (fweek+53*range(7))[:nday]
         # and return the day_of_week for the entire year
         self.dow = day_of_week
@@ -304,33 +304,36 @@ class Household(object):
             Simulation of the receptacle loads.
             '''
 
-            cwd = os.getcwd()
-            os.chdir(r'E:\3_PhD\6_Python\IDEAS')
             dataset = ast.literal_eval(open('Appliances.py').read())
             # define number of minutes
             nmin = self.nday * 1440
             # determine all transitions of the appliances depending on the appliance
             # basic properties, ie. stochastic versus cycling power profile
+            cdir = os.getcwd()
+            os.chdir(cdir+'\\Activities')
+
             power = np.zeros(nmin+1)
             radi = np.zeros(nmin+1)
             conv = np.zeros(nmin+1)
+            cluster = self.clusters[0]['wkdy']
+            nday = self.nday
+            dow = self.dow
+            occ_m = self.occ_m[0]
             for app in self.apps:
                 # create the equipment object with data from dataset.py
                 eq = Equipment(**dataset[app])
-                r_app = eq.simulate(self.doy, self.clusters, self.occ_m)
-                power += r_app['p']
-                radi += r_app['r']
-                conv += r_app['c']
+                r_app = eq.simulate(nday, dow, cluster, occ_m)
+                power += r_app['P']
+                radi += r_app['QRad']
+                conv += r_app['QCon']
             # a new time axis for power output is to be created as a different time
             # step is used in comparison to occupancy
             time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
     
             react = np.zeros(nmin+1)
-    
+            os.chdir(cdir)
             self.r_receptacles = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
                       'QCon':conv, 'Wknds':None, 'mDHW':None}
-            # go back and return the occupancy states
-            os.chdir(cwd)
 
             return None
     
@@ -367,8 +370,8 @@ class Household(object):
             pow_id = np.zeros(minutes+1)
             prob_adj = 0.1 # hourly probability to adjust
             pow_adj = 40 # power by which is adjusted
-            power = np.zeros(minutes+1)
-            react = np.zeros(minutes+1)
+            P = np.zeros(minutes+1)
+            Q = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
                 to += 1
                 for run in range(0, 10):
@@ -381,25 +384,24 @@ class Household(object):
                     # the appliance basic properties, ie. stochastic versus 
                     # cycling power profile
                     if occ_m[to] == 0:
-                        power[tl] = pow_id[tl]
+                        P[tl] = pow_id[tl]
                     elif random.random() <= prob_adj:
-                        delta = power[tl-1] - pow_id[tl]
+                        delta = P[tl-1] - pow_id[tl]
                         delta_min = np.abs(delta - pow_adj)
                         delta_plus = np.abs(delta + pow_adj)
                         if delta > 0 and delta_min < np.abs(delta) :
-                            power[tl] = power[tl-1]-pow_adj
+                            P[tl] = P[tl-1]-pow_adj
                         elif delta < 0 and delta_plus < np.abs(delta):
-                            power[tl] = power[tl-1]+pow_adj
+                            P[tl] = P[tl-1]+pow_adj
                         else:
-                            power[tl] = power[tl-1]
+                            P[tl] = P[tl-1]
                     else:
-                        power[tl] = power[tl-1]
+                        P[tl] = P[tl-1]
     
-            radi = power*0.55
-            conv = power*0.45
+            radi = P*0.55
+            conv = P*0.45
     
-            result = {'time':time, 'P':power, 'Q':react, 'QRad':radi, 
-                      'QCon':conv}
+            result = {'time':time, 'P':P, 'Q':Q, 'QRad':radi, 'QCon':conv}
 
             self.d_lighting = result    
             # output ##########################################################
@@ -431,9 +433,9 @@ class Household(object):
         setting = []
         return setting
 
-    def output(self):
+    def summarize(self):
         '''
-        Create proper output files for IDEAS simulations.
+        Create proper summary for later-on creating IDEAS simulations input.
         '''
         
         return None
@@ -457,50 +459,53 @@ class Equipment(object):
             and Markov state-space of Richardson et al.
             '''
 
+            # parameters ######################################################
+            # First we check the required activity and load the respective
+            # stats.DTMC file with its data.
             len_cycle = self.cycle_length
             if self.activity not in ('None','Presence'):
-                actdata = stats.DTMC(name=self.activity) 
+                actdata = stats.DTMC(cluster=cluster)
             else:
                 actdata = None
 
-            to = -1
-            tl = -1
-            left = -1
-            nbin = 144
-            minutes = nday*24*60
-            power = np.zeros(minutes+1)
+            # script ##########################################################
+            # a yearly simulation is basic, also in a unittest
+            nbin = 144 
+            minutes = nday * 1440
+            to = -1 # time counter for occupancy
+            tl = -1 # time counter for load
+            left = -1 # time counter for appliance duration
+            P = np.zeros(minutes+1)
+            Q = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
                 to += 1
                 for run in range(10):
                     tl += 1
                     # check if this appliance is already on
                     if left <= 0:
-                        # determine possibilities based on the required
-                        # activities, starting with no acts required
+                        # determine possibilities
                         if self.activity == 'None':
                             prob = 1
-                        # continuing with only presence required,
                         elif self.activity == 'Presence':
-                            prob = occ[to]
-                        # and then real activities in weekend and
-                        elif dow[to] > 4:
+                            prob = 1 if occ[to] == 1 else 0
+                        elif dow[doy] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_we[step][occ[to]]
-                        # on workday
+                            prob = occs * actdata.prob_we[step]
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_wd[step][occ[to]]
+                            prob = occs * actdata.prob_wd[step]
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)
-                            power[tl] += self.standby_power
+                            P[tl] += self.standby_power
                     else:
                         left += -1
-                        power[tl] += self.cycle_power
+                        P[tl] += self.cycle_power
 
-            r_app = {'p':power, 'r': power*self.frad, 'c':power*self.fconv}
+            r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad, 
+                      'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
                             
-            return r_app
+            return r_eq
 
         def cycle(self, nday):
             '''
@@ -509,19 +514,21 @@ class Equipment(object):
             '''
             
             nbin = nday*24*60
-            power = np.zeros(nbin+1)
+            P = np.zeros(nbin+1)
+            Q = np.zeros(nbin+1)
             left = random.gauss(self.delay, self.delay/4)
             for minute in range(nbin+1):
                 if left <= 0:
                     left += self.cycle_length
-                    power[minute] = self.cycle_power
+                    P[minute] = self.cycle_power
                 else:
                     left += -1
-                    power[minute] = self.standby_power
-                    
-            r_app = {'p':power, 'r': power*self.frad, 'c':power*self.fconv}
+                    P[minute] = self.standby_power
+
+            r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad, 
+                      'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
                             
-            return r_app
+            return r_eq
 
         if self.delay == 0:
             r_app = stochastic(self, nday, dow, cluster, occ)
