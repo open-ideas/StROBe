@@ -456,11 +456,13 @@ class Equipment(object):
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
             '''
+
             len_cycle = self.cycle_length
             if self.activity not in ('None','Presence'):
                 actdata = stats.DTMC(name=self.activity) 
             else:
                 actdata = None
+
             to = -1
             tl = -1
             left = -1
