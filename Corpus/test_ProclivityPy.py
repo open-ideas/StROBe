@@ -12,6 +12,12 @@ import residential
 DIR = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(DIR)+'\\Data')
 
+class EquipmentTest(unittest.TestCase):
+    '''
+    Testing the equipment class.
+    '''
+
+
 class HouseholdTest(unittest.TestCase):
     '''
     Testing the household class.
@@ -38,6 +44,11 @@ class HouseholdTest(unittest.TestCase):
         test = residential.Household('Example')
         test.simulate()
         self.assertTrue(len(test.occ)!=0)
+
+class CommunityTest(unittest.TestCase):
+    '''
+    Testing the community class.
+    '''
 
 if __name__ == '__main__':
     suite1 = unittest.TestLoader().loadTestsFromTestCase(HouseholdTest)
