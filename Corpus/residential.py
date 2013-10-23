@@ -19,6 +19,7 @@ import itertools
 
 class Community(object):
     '''
+    The Community class defines a set of hosueholds.
     '''
     
     def __init__(self, name, **kwargs):
@@ -28,6 +29,19 @@ class Community(object):
         
         return None
 
+    def simulate(self):
+        '''
+        Simulation of the Community object.
+        '''
+        
+        return None
+        
+    def output(self):
+        '''
+        Output of the simulation results for IDEAS.mo-simulation.
+        '''
+        
+        return None
 
 
 class Household(object):
