@@ -16,6 +16,20 @@ import os
 import cPickle
 import itertools
 
+
+class Community(object):
+    '''
+    '''
+    
+    def __init__(self, name, **kwargs):
+        '''
+        Initiation of Community object.
+        '''
+        
+        return None
+
+
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
