@@ -361,8 +361,8 @@ class Household(object):
                 power += r_app['P']
                 radi += r_app['QRad']
                 conv += r_app['QCon']
-            # a new time axis for power output is to be created as a different time
-            # step is used in comparison to occupancy
+            # a new time axis for power output is to be created as a different
+            # time step is used in comparison to occupancy
             time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
     
             react = np.zeros(nmin+1)
@@ -537,10 +537,10 @@ class Equipment(object):
                             prob = 1 if occ[to] == 1 else 0
                         elif dow[doy] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_we[step]
+                            prob = occs * actdata.prob_we[self.activity][step]
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_wd[step]
+                            prob = occs * actdata.prob_wd[self.activity][step]
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)
