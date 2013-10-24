@@ -72,12 +72,6 @@ class Household(object):
         self.creation = time.asctime()
         self.name = name
         self.parameterize()
-        print 'Household-object created and parameterized.'
-        print ' - Employment types are %s' % str(self.members)
-        summary = [] #loop dics and remove dubbles
-        for member in self.clusters:
-            summary += member.values()
-        print ' - Set of clusters is %s \n' % str(list(set(summary)))
 
     def parameterize(self, **kwargs):
         '''
@@ -145,6 +139,13 @@ class Household(object):
         self.apps = appliances()
         self.clusters = clusters(self.members)
         # and return
+        print 'Household-object created and parameterized.'
+        print ' - Employment types are %s' % str(self.members)
+        summary = [] #loop dics and remove dubbles
+        for member in self.clusters:
+            summary += member.values()
+        print ' - Set of clusters is %s \n' % str(list(set(summary)))
+
         return None
 
     def simulate(self, year=2013):

@@ -17,7 +17,6 @@ class EquipmentTest(unittest.TestCase):
     Testing the equipment class.
     '''
 
-
 class HouseholdTest(unittest.TestCase):
     '''
     Testing the household class.
