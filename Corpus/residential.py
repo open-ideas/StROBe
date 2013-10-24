@@ -114,6 +114,13 @@ class Household(object):
                 app_n.append(app) if owner else None
             return app_n            
 
+        def tappings():
+            '''
+            Define the present household tapping types.
+            '''
+            tap_n = ['shortFlow', 'mediumFlow', 'bathFlow', 'showerFlow']
+            return tap_n
+
         def clusters(members):
             '''
             Allocate each household member to the correct cluster based on the 
@@ -134,9 +141,10 @@ class Household(object):
                     clusters.append(C)
             # and return the list of clusters
             return clusters
-        # and run both
+        # and run all
         self.members = members()
         self.apps = appliances()
+        self.taps = tappings()
         self.clusters = clusters(self.members)
         # and return
         print 'Household-object created and parameterized.'
