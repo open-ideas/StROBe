@@ -106,4 +106,12 @@
 'WasherDryer':{'name':'WasherDryer', 'frad':0.0, 'fconv':0.25,
     'cycle_n':195.906595865545, 'cycle_length':198, 'cycle_power':792.034786057663,
     'standby_power':1, 'cal':0.0547249401460521, 'owner':0.153, 
-    'consumption':520.157476087695, 'delay':0, 'activity':'DoingLaundry'}}
+    'consumption':520.157476087695, 'delay':0, 'activity':'DoingLaundry'}
+'shortFlow':{'cycle_length':1, 'standby_flow':0, 'cycle_flow':1
+	'cycle_n':10220, 'cal':0.047662, 'activity':'Presence'},
+'bathFlow':{'cycle_length':10, 'standby_flow':0, 'cycle_flow':14
+	'cycle_n':52, 'cal':0.0034955, 'activity':'WashDress'},
+'mediumFlow':{'cycle_length':1, 'standby_flow':0, 'cycle_flow':6
+	'cycle_n':4380, 'cal':0.0312138, 'activity':'Presence'},
+'showerFlow':{'cycle_length':5, 'standby_flow':0, 'cycle_flow':8
+	'cycle_n':73, 'cal':0.0.012849, 'activity':'WashDress'}}
