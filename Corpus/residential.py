@@ -144,7 +144,7 @@ class Household(object):
         summary = [] #loop dics and remove dubbles
         for member in self.clusters:
             summary += member.values()
-        print ' - Set of clusters is %s \n' % str(list(set(summary)))
+        print ' - Set of clusters is %s' % str(list(set(summary)))
 
         return None
 
@@ -318,6 +318,12 @@ class Household(object):
         os.chdir(cdir)
         self.occ = occ_year
         self.occ_m = occ_merged
+        # and print statements
+        presence = [to for to in self.occ_m[0] if to < 2]
+        hours = len(presence)/6
+        print ' - Total presence time is %s out of 8760 hours' % str(hours)
+        print '   (being %s percent)' % str(hours*100/8760)
+        
         return None
 
     def __plugload__(self):
@@ -361,8 +367,16 @@ class Household(object):
     
             react = np.zeros(nmin+1)
             os.chdir(cdir)
-            self.r_receptacles = {'time':time, 'occ':None, 'P':power, 'Q':react, 'QRad':radi, 
-                      'QCon':conv, 'Wknds':None, 'mDHW':None}
+
+            result = {'time':time, 'occ':None, 'P':power, 'Q':react,
+                      'QRad':radi, 'QCon':conv, 'Wknds':None, 'mDHW':None}
+
+            self.r_receptacles = result
+
+            # output ##########################################################
+            # only the power load is returned
+            load = int(np.sum(result['P'])/60/1000)
+            print ' - Receptacle load is %s kWh' % str(load)
 
             return None
     
@@ -432,13 +446,17 @@ class Household(object):
     
             result = {'time':time, 'P':P, 'Q':Q, 'QRad':radi, 'QCon':conv}
 
-            self.d_lighting = result    
+            self.r_lighting = result    
             # output ##########################################################
             # only the power load is returned
+            load = int(np.sum(result['P'])/60/1000)
+            print ' - Lighting load is %s kWh' % str(load)
+
             return None
 
         receptacles(self)
         lightingload(self)
+
 
         return None
 

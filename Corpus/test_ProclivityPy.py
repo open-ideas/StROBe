@@ -31,6 +31,7 @@ class HouseholdTest(unittest.TestCase):
         self.assertTrue(len(test.apps)!=0)
         self.assertTrue(len(test.members)!=0)
         self.assertTrue(len(test.clusters)!=0)
+        print '\n'
 
     def test_creation_2(self):
         test = residential.Household(self.name, members=['FTE','PTE'])
@@ -38,12 +39,14 @@ class HouseholdTest(unittest.TestCase):
         self.assertTrue(len(test.apps)!=0)
         self.assertTrue(len(test.members)!=0)
         self.assertTrue(len(test.clusters)!=0)
-
+        print '\n'
+        
     def test_simulation(self):
         test = residential.Household('Example')
         test.simulate()
         self.assertTrue(len(test.occ)!=0)
-
+        print '\n'
+        
 class CommunityTest(unittest.TestCase):
     '''
     Testing the community class.
