@@ -109,9 +109,10 @@ class Household(object):
             dataset = ast.literal_eval(open('Appliances.py').read())
             app_n = []
             for app in dataset:
-                obj = Equipment(**dataset[app])
-                owner = obj.owner <= random.random()
-                app_n.append(app) if owner else None
+                if dataset[app]['type'] == 'appliance':
+                    obj = Equipment(**dataset[app])
+                    owner = obj.owner <= random.random()
+                    app_n.append(app) if owner else None
             return app_n            
 
         def tappings():
@@ -166,6 +167,7 @@ class Household(object):
         self.__chronology__(year)
         self.__occupancy__()
         self.__plugload__()
+        self.__dhwload__()
 
     def __chronology__(self, year):
         '''
@@ -474,80 +476,42 @@ class Household(object):
         J.Widen (2009).
         '''
 
-        wknds, occ = result_occ['Wknds'], result_occ['occ']
-    
-        def stochastic(app, wknds, occ, test, htest):
-            """
-            Simulate non-cycling appliances based on occupancy and the model 
-            and Markov state-space of Richardson et al.
-            """
-
-            corr = 1.1
-
-            if htest in [2,3]:
-                corr = 0.5
-            
-            act = app.activity
-            len_cycle = app.cycle_length
-            if act not in ('None','Presence'):
-                actdata = StateSpace(filename=act) 
-            else:
-                actdata = None
-            idx = -1
-            left = -1
-            minute = -1
-            minutes = 525600 if not test else 1440
-            days = 365 if not test else 1
-            flow = np.zeros(minutes+1)
-            for doy in range(0, days):
-                for step in range(0, 144):
-                    idx += 1
-                    for run in range(0, 10):
-                        minute += 1
-                        # check if this appliance is already on
-                        if left <= 0:
-                            # determine possibilities
-                            if act == 'None':
-                                prob = 1
-                            elif act == 'Presence':
-                                prob = occ[idx]
-                            elif wknds[idx] == 1:
-                                occs = 1 if occ[idx] != 0 else 0
-                                prob = occs * actdata.prob_we[step][int(occ[idx])]
-                                corr = 0.6
-                            else:
-                                occs = 1 if occ[idx] != 0 else 0
-                                prob = occs * actdata.prob_wd[step][int(occ[idx])]
-                            # check if there is a statechange in the appliance
-                            if random.random() < prob * app.cal * corr:
-                                left = random.gauss(len_cycle, len_cycle/10)
-                                flow[minute] += app.standby_flow
-                        else:
-                            left += -1
-                            flow[minute] += app.cycle_flow
-            flow = flow / 60
-
-            return flow
-
-        # a yearly simulation is basic if the model is not used in a unittest
-        minutes = 525600 if not test else 1440
+        dataset = ast.literal_eval(open('Appliances.py').read())
+        # define number of minutes
+        nmin = self.nday * 1440
         # determine all transitions of the appliances depending on the appliance
         # basic properties, ie. stochastic versus cycling power profile
-        flow = np.zeros(minutes+1)
-        for drawoff in self.flo_n:
-            flo = Drawoff(filename=drawoff)
-            flow_app = stochastic(flo, wknds, occ, test, self.htype)
-            flow += flow_app
-        # a new time axis for power output is to be created as a different time
-        # step is used in comparison to occupancy
-        time = np.arange(0, 31536060, 60)
-        # both time-axis and effective flow volume rates are output
+        cdir = os.getcwd()
+        os.chdir(cdir+'\\Activities')
 
-        result = {'time':time, 'occ':None, 'P':None, 'Q':None, 'QRad':None, 
-                  'QCon':None, 'Wknds':None, 'mDHW':flow}
+        flow = np.zeros(nmin+1)
+        cluster = self.clusters[0]['wkdy']
+        nday = self.nday
+        dow = self.dow
+        occ_m = self.occ_m[0]
+        for tap in self.taps:
+            # create the equipment object with data from dataset.py
+            eq = Equipment(**dataset[tap])
+            r_tap = eq.simulate(nday, dow, cluster, occ_m)
+            flow += r_tap['mDHW']
+        # a new time axis for power output is to be created as a different
+        # time step is used in comparison to occupancy
+        time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
 
-        return result
+        os.chdir(cdir)
 
+        result = {'time':time, 'occ':None, 'P':None, 'Q':None,
+                  'QRad':None, 'QCon':None, 'Wknds':None, 'mDHW':flow}
+
+        self.r_flows = result
+
+        # output ##########################################################
+        # only the power load is returned
+        load = np.sum(result['mDHW'])
+        loadpppd = int(load/self.nday/len(self.clusters))
+        print ' - Draw-off is %s l/pp.day' % str(loadpppd)
+
+        return None
 
     def __shsetting__(self):
         '''
@@ -579,7 +543,61 @@ class Equipment(object):
 
     def simulate(self, nday, dow, cluster, occ):
 
-        def stochastic(self, nday, dow, cluster, occ):
+        def stochastic_flow(self, nday, dow, cluster, occ):
+            """
+            Simulate non-cycling appliances based on occupancy and the model 
+            and Markov state-space of Richardson et al.
+            """
+
+            # parameters ######################################################
+            # First we check the required activity and load the respective
+            # stats.DTMC file with its data.
+            len_cycle = self.cycle_length
+            if self.activity not in ('None','Presence'):
+                actdata = stats.DTMC(cluster=cluster)
+            else:
+                actdata = None
+
+            # script ##########################################################
+            # a yearly simulation is basic, also in a unittest
+            corr = 1.1
+            nbin = 144 
+            minutes = nday * 1440
+            to = -1 # time counter for occupancy
+            tl = -1 # time counter for load
+            left = -1 # time counter for appliance duration
+            flow = np.zeros(minutes+1)
+            for doy, step in itertools.product(range(nday), range(nbin)):
+                to += 1
+                for run in range(0, 10):
+                    tl += 1
+                    # check if this appliance is already on
+                    if left <= 0:
+                        # determine possibilities
+                        if self.activity == 'None':
+                            prob = 1
+                        elif self.activity == 'Presence':
+                            prob = 1 if occ[to] == 1 else 0
+                        elif dow[doy] > 4:
+                            occs = 1 if occ[to] == 1 else 0
+                            prob = occs * corr * actdata.prob_we[self.activity][step]
+                        else:
+                            occs = 1 if occ[to] == 1 else 0
+                            prob = occs * corr * actdata.prob_wd[self.activity][step]
+                        # check if there is a statechange in the appliance
+                        if random.random() < prob * self.cal:
+                            left = random.gauss(len_cycle, len_cycle/10)
+                            flow[tl] += self.standby_flow
+                    else:
+                        left += -1
+                        flow[tl] += self.cycle_flow
+
+            r_fl = {'time':time, 'occ':None, 'P':None, 'Q':None, 'QRad':None, 
+                      'QCon':None, 'Wknds':None, 'mDHW':flow}
+                            
+            return r_fl
+
+        def stochastic_load(self, nday, dow, cluster, occ):
             '''
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
@@ -633,7 +651,7 @@ class Equipment(object):
                             
             return r_eq
 
-        def cycle(self, nday):
+        def cycle_load(self, nday):
             '''
             Simulate cycling appliances, eg. fridges and freezers based on
             average clycle length
@@ -656,9 +674,13 @@ class Equipment(object):
                             
             return r_eq
 
-        if self.delay == 0:
-            r_app = stochastic(self, nday, dow, cluster, occ)
+        if self.type == 'appliance':
+            #check if the equipment is an appliance instead of tapping point
+            if self.delay == 0:
+                r_app = stochastic_load(self, nday, dow, cluster, occ)
+            else:
+                r_app = cycle_load(self, nday)
         else:
-            r_app = cycle(self, nday)
-            
+            r_app = stochastic_flow(self, nday, dow, cluster, occ)
+
         return r_app
