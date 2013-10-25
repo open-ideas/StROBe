@@ -469,65 +469,85 @@ class Household(object):
         return None
 
     def __dhwload__(self):
-            '''
-            Simulate use of domestic hot water based on Jordan & Vajen (2001) and 
-            J.Widen (2009).
-            '''
+        '''
+        Simulate use of domestic hot water based on Jordan & Vajen (2001) and 
+        J.Widen (2009).
+        '''
+
+        wknds, occ = result_occ['Wknds'], result_occ['occ']
     
-            wknds, occ = result_occ['Wknds'], result_occ['occ']
-    
-            def stochastic(app, wknds, occ, test, htest):
-                """
-                Simulate non-cycling appliances based on occupancy and the model 
-                and Markov state-space of Richardson et al.
-                """
-    
-                corr = 1.1
-    
-                if htest in [2,3]:
-                    corr = 0.5
-                
-                act = app.activity
-                len_cycle = app.cycle_length
-                if act not in ('None','Presence'):
-                    actdata = StateSpace(filename=act) 
-                else:
-                    actdata = None
-                idx = -1
-                left = -1
-                minute = -1
-                minutes = 525600 if not test else 1440
-                days = 365 if not test else 1
-                flow = np.zeros(minutes+1)
-                for doy in range(0, days):
-                    for step in range(0, 144):
-                        idx += 1
-                        for run in range(0, 10):
-                            minute += 1
-                            # check if this appliance is already on
-                            if left <= 0:
-                                # determine possibilities
-                                if act == 'None':
-                                    prob = 1
-                                elif act == 'Presence':
-                                    prob = occ[idx]
-                                elif wknds[idx] == 1:
-                                    occs = 1 if occ[idx] != 0 else 0
-                                    prob = occs * actdata.prob_we[step][int(occ[idx])]
-                                    corr = 0.6
-                                else:
-                                    occs = 1 if occ[idx] != 0 else 0
-                                    prob = occs * actdata.prob_wd[step][int(occ[idx])]
-                                # check if there is a statechange in the appliance
-                                if random.random() < prob * app.cal * corr:
-                                    left = random.gauss(len_cycle, len_cycle/10)
-                                    flow[minute] += app.standby_flow
+        def stochastic(app, wknds, occ, test, htest):
+            """
+            Simulate non-cycling appliances based on occupancy and the model 
+            and Markov state-space of Richardson et al.
+            """
+
+            corr = 1.1
+
+            if htest in [2,3]:
+                corr = 0.5
+            
+            act = app.activity
+            len_cycle = app.cycle_length
+            if act not in ('None','Presence'):
+                actdata = StateSpace(filename=act) 
+            else:
+                actdata = None
+            idx = -1
+            left = -1
+            minute = -1
+            minutes = 525600 if not test else 1440
+            days = 365 if not test else 1
+            flow = np.zeros(minutes+1)
+            for doy in range(0, days):
+                for step in range(0, 144):
+                    idx += 1
+                    for run in range(0, 10):
+                        minute += 1
+                        # check if this appliance is already on
+                        if left <= 0:
+                            # determine possibilities
+                            if act == 'None':
+                                prob = 1
+                            elif act == 'Presence':
+                                prob = occ[idx]
+                            elif wknds[idx] == 1:
+                                occs = 1 if occ[idx] != 0 else 0
+                                prob = occs * actdata.prob_we[step][int(occ[idx])]
+                                corr = 0.6
                             else:
-                                left += -1
-                                flow[minute] += app.cycle_flow
-                flow = flow / 60
-    
-                return flow
+                                occs = 1 if occ[idx] != 0 else 0
+                                prob = occs * actdata.prob_wd[step][int(occ[idx])]
+                            # check if there is a statechange in the appliance
+                            if random.random() < prob * app.cal * corr:
+                                left = random.gauss(len_cycle, len_cycle/10)
+                                flow[minute] += app.standby_flow
+                        else:
+                            left += -1
+                            flow[minute] += app.cycle_flow
+            flow = flow / 60
+
+            return flow
+
+        # a yearly simulation is basic if the model is not used in a unittest
+        minutes = 525600 if not test else 1440
+        # determine all transitions of the appliances depending on the appliance
+        # basic properties, ie. stochastic versus cycling power profile
+        flow = np.zeros(minutes+1)
+        for drawoff in self.flo_n:
+            flo = Drawoff(filename=drawoff)
+            flow_app = stochastic(flo, wknds, occ, test, self.htype)
+            flow += flow_app
+        # a new time axis for power output is to be created as a different time
+        # step is used in comparison to occupancy
+        time = np.arange(0, 31536060, 60)
+        # both time-axis and effective flow volume rates are output
+
+        result = {'time':time, 'occ':None, 'P':None, 'Q':None, 'QRad':None, 
+                  'QCon':None, 'Wknds':None, 'mDHW':flow}
+
+        return result
+
 
     def __shsetting__(self):
         '''
