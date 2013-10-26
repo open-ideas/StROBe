@@ -661,13 +661,13 @@ class Equipment(object):
             P = np.zeros(nbin+1)
             Q = np.zeros(nbin+1)
             left = random.gauss(self.delay, self.delay/4)
-            for minute in range(nbin+1):
+            for tl in range(nbin+1):
                 if left <= 0:
                     left += self.cycle_length
-                    P[minute] = self.cycle_power
+                    P[tl] = self.cycle_power
                 else:
                     left += -1
-                    P[minute] = self.standby_power
+                    P[tl] = self.standby_power
 
             r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad, 
                       'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
