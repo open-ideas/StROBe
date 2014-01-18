@@ -1,12 +1,12 @@
-ProclivityPy
-============
+uzanto
+=======
 
 Currently in beta.
 
-**ProclivityPy** is an open web tool developed at the [KU Leuven Building Physics Section](http://bwk.kuleuven.be/bwf/) 
+**uzanto** is an open web tool developed at the [KU Leuven Building Physics Section](http://bwk.kuleuven.be/bwf/) 
 to model the pervasive space for residential integrated district energy assessment simulations in the
 [open](https://github.com/open-ideas) **IDEAS** modeling environment (among others).
-Primarily conceived as a tool for scientific researchers, **ProclivityPy** aims at providing missing boundary conditions
+Primarily conceived as a tool for scientific researchers, **uzanto** aims at providing missing boundary conditions
 in integrated district energy assessment simulations related to human behavior, such as the use of appliances and 
 lighting, space heating settings and domestic hot water redrawals.
 
@@ -16,7 +16,7 @@ For more information on the implementation, see the [GitHub Wiki]
 
 ###Dependencies
 
-**ProclivityPy** is implemented in Python and uses the packages Os, Numpy, Random, Time, Datetime and Ast, which are
+**uzanto** is implemented in Python and uses the packages Os, Numpy, Random, Time, Datetime and Ast, which are
 all generally available.
 
 ###Examples
