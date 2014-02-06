@@ -23,32 +23,31 @@ def get_occDict(cluster, **kwargs):
     occDict = dict()
     ##########################################################################
     # first we load the occupancy start states 'oss' from StartStates.txt
-    oss = dict()    
+    ss = dict()    
     data = np.loadtxt('StartStates.txt', float)
     for i in range(len(data)):
-        oss.update({str(i+1):data[i]})
+        ss.update({str(i+1):data[i]})
     # and add the 'oss' data to the occupancy dictionary
-    occDict.update({'oss':oss})
+    occDict.update({'ss':ss})
     ##########################################################################
     # Second we load the occupancy transitions state probabilities 'osn' 
     # from TransitionProbability.txt
     data = np.loadtxt('TransitionProbability.txt', float)
     for i in range(3):
-        osn_i = dict()
+        os_i = dict()
         for j in range(48):
-            osn_i.update({str(j+1):data[i*48+j]})
+            os_i.update({str(j+1):data[i*48+j]})
         # and add the 'osn_i' data to the occupancy dictionary
-        occDict.update({'osn_'+str(i+1):osn_i})
+        occDict.update({'os_'+str(i+1):os_i})
     ##########################################################################
-    # Third we load the occupancy transitions state probabilities 'osn' 
-    # from DurationProbability.txt
+    # Third we load the Markov time density 'ol' from DurationProbability.txt
     data = np.loadtxt('DurationProbability.txt', float)
     for i in range(3):
-        oln_i = dict()
+        ol_i = dict()
         for j in range(48):
-            oln_i.update({str(j+1):data[i*48+j]})
+            ol_i.update({str(j+1):data[i*48+j]})
         # and add the 'osn_i' data to the occupancy dictionary
-        occDict.update({'oln_'+str(i+1):oln_i})
+        occDict.update({'ol_'+str(i+1):ol_i})
     ##########################################################################
     # and return the final occDict
     return occDict
