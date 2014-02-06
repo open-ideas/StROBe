@@ -9,6 +9,9 @@ import numpy as np
 import random
 import ast
 
+import data
+
+
 def get_probability(rnd, prob, p_type='cum'):
     '''
     Find the x-value in a given comulative probability 'prob_cum' based on a 
@@ -29,13 +32,12 @@ class MCSA(object):
     # All object parameters are given in kwargs
     def __init__(self, cluster, **kwargs):
         # load the dataset of the cluster into ds
-        filnam = cluster+'.py'
-        ds = ast.literal_eval(open(filnam).read())
+        ds = data.get_occDict(cluster)
         # and add them as class parameters
-        self.OSS = ds['OSS']
-        self.OPM = {1:ds['OPM_1'], 2:ds['OPM_2'], 3:ds['OPM_3']}
-        self.ODM = {1:ds['ODM_1'], 2:ds['ODM_2'], 3:ds['ODM_3']}
-        self.RED = ds['RED']
+        self.OSS = ds['ss']
+        self.OPM = {1:ds['os_1'], 2:ds['os_2'], 3:ds['os_3']}
+        self.ODM = {1:ds['ol_1'], 2:ds['ol_2'], 3:ds['ol_3']}
+#        self.RED = ds['RED']
 
     def startstate(self):
         '''
@@ -75,7 +77,7 @@ class DTMC(object):
     # All object parameters are given in kwargs
     def __init__(self, cluster, **kwargs):
         # load the dataset of the cluster into ds
-        filnam = cluster+'.py'
+        filnam = 'C'+str(cluster+3)+'.py'
         ds = ast.literal_eval(open(filnam).read())
         # and add them as class parameters
         self.period = ds['period']
