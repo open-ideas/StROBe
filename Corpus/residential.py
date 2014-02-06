@@ -8,7 +8,6 @@ Created on Mon October 07 16:16:10 2013
 import random
 import numpy as np
 import time
-import stats
 import datetime
 import calendar
 import ast
@@ -16,6 +15,7 @@ import os
 import cPickle
 import itertools
 
+import stats
 
 class Community(object):
     '''
@@ -137,8 +137,8 @@ class Household(object):
                     for day in ['wkdy', 'sat', 'son']:
                         prob = dataset[day][ind]
                         cons = stats.get_probability(random.random(), 
-                                                     prob, p_type='prob')+3
-                        C.update({day : 'C'+str(cons)})
+                                                     prob, p_type='prob')
+                        C.update({day : cons})
                     clusters.append(C)
             # and return the list of clusters
             return clusters
@@ -192,7 +192,7 @@ class Household(object):
         - Including weekend days,
         - starting from a regular monday at 4:00 AM.
         '''
-        def check(occday, RED, min_form = True, min_time = False):
+        def check(occday, min_form = True, min_time = False):
             '''
             We set a check which becomes True if the simulated day behaves 
             according to the cluster, as a safety measure for impossible
@@ -209,7 +209,7 @@ class Household(object):
                     if occday[i+1] != occday[i]:
                         location = np.append(location, i+1)
                         reduction = np.append(reduction,occday[i+1])
-                shape = np.array_equal(reduction, RED)
+#                shape = np.array_equal(reduction, RED)
 
             # script 2 ########################################################
             # And second we see if the chain has nu sub-30 min differences
@@ -263,7 +263,7 @@ class Household(object):
                         occs[tbin] = occs[tbin - 1]
                         dt += -1
                 # whereafer we control if this day is ok
-                daycheck = check(occs, SA.RED)
+                daycheck = check(occs)
                 # and we include a break if the while-loop takes to long until
                 # check()-conditions are fulfilled.
                 if datetime.datetime.utcnow() > end:
