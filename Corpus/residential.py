@@ -297,7 +297,6 @@ class Household(object):
         # and run the three type of days, ie. wkdy, sat and son succesively
         # by which we can create a typical week.
         cdir = os.getcwd()
-        os.chdir(cdir+'\\Occupancies')
         occ_week = []
         for member in self.clusters:
             startstate = 2 #4.00 AM
