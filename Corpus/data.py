@@ -8,15 +8,14 @@ Created on Thu Feb 06 09:48:07 2014
 import os
 import numpy as np
 
-DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
-
 def get_occDict(cluster, **kwargs):
     """
-    Create the dictioarry with occupancy data based on the files retrieved from
+    Create the dictionary with occupancy data based on the files retrieved from
     Aerts et al. as given at http://homepages.vub.ac.be/~daerts/Occupancy.html
-    and stored in 'StROBe/Data/Occupancy'.
+    and stored in 'StROBe/Data/Aerts_Occupancy'.
     """
     #first go the the correct location
+    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
     PATH = DATA_PATH + '\\Pattern' + str(cluster)
     os.chdir(PATH)
     # create an empty dictionary
@@ -52,8 +51,29 @@ def get_occDict(cluster, **kwargs):
     # and return the final occDict
     return occDict
 
-a = get_occDict(1)
-
-print type(a)
-
-
+def get_actDict(cluster, **kwargs):
+    """
+    Create the dictionary with activity data based on the files retrieved from
+    Aerts et al. as given at http://homepages.vub.ac.be/~daerts/Activity.html
+    and stored in 'StROBe/Data/Aerts_activity'.
+    """
+    #first go the the correct location
+    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Activities'
+    os.chdir(DATA_PATH)
+    # create an empty dictionary
+    actDict = dict()
+    ##########################################################################
+    # first we define the dictionary used as legend for the load file
+    act = {0:'pc', 1:'food', 2:'vacuum', 3:'iron', 4:'tv', 5:'audio', 
+           6:'dishes', 7:'washing', 8:'drying', 9:'shower'}
+    ##########################################################################
+    # Second we load the activity proclivity functions 'agn' 
+    # from Patter*cluster*.txt
+    FILNAM = 'Pattern'+str(cluster)+'.txt'
+    data = np.loadtxt(FILNAM, float)
+    for i in range(10):
+        actDict.update({act[i]:data.T[i]})
+    ##########################################################################
+    # and return the final actDict
+    actDict.updte({'period':600, 'steps':144})
+    return actDict
