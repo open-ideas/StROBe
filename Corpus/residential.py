@@ -167,7 +167,7 @@ class Household(object):
         self.year = year
         self.__chronology__(year)
         self.__occupancy__()
-#        self.__plugload__()
+        self.__plugload__()
         self.__dhwload__()
 
     def __chronology__(self, year):
@@ -354,13 +354,13 @@ class Household(object):
             nmin = self.nday * 1440
             # determine all transitions of the appliances depending on the appliance
             # basic properties, ie. stochastic versus cycling power profile
-            cdir = os.getcwd()
-            os.chdir(cdir+'\\Activities')
+#            cdir = os.getcwd()
+#            os.chdir(cdir+'\\Activities')
 
             power = np.zeros(nmin+1)
             radi = np.zeros(nmin+1)
             conv = np.zeros(nmin+1)
-            cluster = self.clusters[0]['wkdy']
+            cluster = self.clusters[0]
             nday = self.nday
             dow = self.dow
             occ_m = self.occ_m[0]
@@ -376,7 +376,7 @@ class Household(object):
             time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
     
             react = np.zeros(nmin+1)
-            os.chdir(cdir)
+#            os.chdir(cdir)
 
             result = {'time':time, 'occ':None, 'P':power, 'Q':react,
                       'QRad':radi, 'QCon':conv, 'Wknds':None, 'mDHW':None}
@@ -401,7 +401,8 @@ class Household(object):
             # levels which determine the need for lighting if occupant.
             # The loaded solar data represent the global horizontal radiation
             # at a time-step of 1-minute for Uccle, Belgium
-            file = open('Climate//irradiance.txt','r')
+            os.chdir(r'E:\\3_PhD\\6_Python\\StROBe\\Data')
+            file = open('Climate\\irradiance.txt','r')
             data_pickle = file.read()
             file.close()
             irr = cPickle.loads(data_pickle)
@@ -466,7 +467,6 @@ class Household(object):
 
         receptacles(self)
         lightingload(self)
-
 
         return None
 
@@ -560,7 +560,7 @@ class Equipment(object):
 
             # script ##########################################################
             # a yearly simulation is basic, also in a unittest
-            corr = 1.1
+#            corr = 1.1
             nbin = 144 
             minutes = nday * 1440
             to = -1 # time counter for occupancy
@@ -568,6 +568,7 @@ class Equipment(object):
             left = -1 # time counter for appliance duration
             flow = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
+                dow_i = dow[doy]
                 to += 1
                 for run in range(0, 10):
                     tl += 1
@@ -580,12 +581,10 @@ class Equipment(object):
                             prob = 1 if occ[to] == 1 else 0
                         elif dow[doy] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            dow_i = dow[doy]
-                            prob = occs * corr * actdata.get_var(dow_i,act,step)
+                            prob = occs * actdata.get_var(dow_i, act, step)
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            dow_i = dow[doy]
-                            prob = occs * corr * actdata.get_var(dow_i,act,step)
+                            prob = occs * actdata.get_var(dow_i, act, step)
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)
@@ -599,7 +598,7 @@ class Equipment(object):
                             
             return r_fl
 
-        def stochastic_load(self, nday, dow, cluster, occ):
+        def stochastic_load(self, nday, dow, clusterDict, occ):
             '''
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
@@ -609,8 +608,9 @@ class Equipment(object):
             # First we check the required activity and load the respective
             # stats.DTMC file with its data.
             len_cycle = self.cycle_length
+            act = self.activity
             if self.activity not in ('None','Presence'):
-                actdata = stats.DTMC(cluster=cluster)
+                actdata = stats.DTMC(clusterDict=clusterDict)
             else:
                 actdata = None
 
@@ -624,6 +624,7 @@ class Equipment(object):
             P = np.zeros(minutes+1)
             Q = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
+                dow_i = dow[doy]
                 to += 1
                 for run in range(10):
                     tl += 1
@@ -636,10 +637,10 @@ class Equipment(object):
                             prob = 1 if occ[to] == 1 else 0
                         elif dow[doy] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_we[self.activity][step]
+                            prob = occs * actdata.get_var(dow_i, act, step)
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.prob_wd[self.activity][step]
+                            prob = occs * actdata.get_var(dow_i, act, step)
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)
