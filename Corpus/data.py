@@ -9,11 +9,11 @@ import os
 import numpy as np
 
 def get_occDict(cluster, **kwargs):
-    """
+    '''
     Create the dictionary with occupancy data based on the files retrieved from
     Aerts et al. as given at http://homepages.vub.ac.be/~daerts/Occupancy.html
     and stored in 'StROBe/Data/Aerts_Occupancy'.
-    """
+    '''
     #first go the the correct location
     DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
     PATH = DATA_PATH + '\\Pattern' + str(cluster)
@@ -52,11 +52,11 @@ def get_occDict(cluster, **kwargs):
     return occDict
 
 def get_actDict(cluster, **kwargs):
-    """
+    '''
     Create the dictionary with activity data based on the files retrieved from
     Aerts et al. as given at http://homepages.vub.ac.be/~daerts/Activity.html
     and stored in 'StROBe/Data/Aerts_activity'.
-    """
+    '''
     #first go the the correct location
     DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Activities'
     os.chdir(DATA_PATH)
@@ -75,5 +75,5 @@ def get_actDict(cluster, **kwargs):
         actDict.update({act[i]:data.T[i]})
     ##########################################################################
     # and return the final actDict
-    actDict.updte({'period':600, 'steps':144})
+    actDict.update({'period':600, 'steps':144})
     return actDict

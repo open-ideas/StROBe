@@ -16,6 +16,7 @@ import cPickle
 import itertools
 
 import stats
+import data
 
 class Community(object):
     '''
@@ -166,7 +167,7 @@ class Household(object):
         self.year = year
         self.__chronology__(year)
         self.__occupancy__()
-        self.__plugload__()
+#        self.__plugload__()
         self.__dhwload__()
 
     def __chronology__(self, year):
@@ -480,24 +481,24 @@ class Household(object):
         nmin = self.nday * 1440
         # determine all transitions of the appliances depending on the appliance
         # basic properties, ie. stochastic versus cycling power profile
-        cdir = os.getcwd()
-        os.chdir(cdir+'\\Activities')
+#        cdir = os.getcwd()
+#        os.chdir(cdir+'\\Activities')
 
         flow = np.zeros(nmin+1)
-        cluster = self.clusters[0]['wkdy']
+        clusterDict = self.clusters[0]
         nday = self.nday
         dow = self.dow
         occ_m = self.occ_m[0]
         for tap in self.taps:
             # create the equipment object with data from dataset.py
             eq = Equipment(**dataset[tap])
-            r_tap = eq.simulate(nday, dow, cluster, occ_m)
+            r_tap = eq.simulate(nday, dow, clusterDict, occ_m)
             flow += r_tap['mDHW']
         # a new time axis for power output is to be created as a different
         # time step is used in comparison to occupancy
         time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
 
-        os.chdir(cdir)
+#        os.chdir(cdir)
 
         result = {'time':time, 'occ':None, 'P':None, 'Q':None,
                   'QRad':None, 'QCon':None, 'Wknds':None, 'mDHW':flow}
@@ -542,18 +543,18 @@ class Equipment(object):
 
     def simulate(self, nday, dow, cluster, occ):
 
-        def stochastic_flow(self, nday, dow, cluster, occ):
-            """
+        def stochastic_flow(self, nday, dow, clusterDict, occ):
+            '''
             Simulate non-cycling appliances based on occupancy and the model 
             and Markov state-space of Richardson et al.
-            """
-
+            '''
             # parameters ######################################################
             # First we check the required activity and load the respective
             # stats.DTMC file with its data.
             len_cycle = self.cycle_length
+            act = self.activity
             if self.activity not in ('None','Presence'):
-                actdata = stats.DTMC(cluster=cluster)
+                actdata = stats.DTMC(clusterDict=clusterDict)
             else:
                 actdata = None
 
@@ -579,10 +580,12 @@ class Equipment(object):
                             prob = 1 if occ[to] == 1 else 0
                         elif dow[doy] > 4:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * corr * actdata.prob_we[self.activity][step]
+                            dow_i = dow[doy]
+                            prob = occs * corr * actdata.get_var(dow_i,act,step)
                         else:
                             occs = 1 if occ[to] == 1 else 0
-                            prob = occs * corr * actdata.prob_wd[self.activity][step]
+                            dow_i = dow[doy]
+                            prob = occs * corr * actdata.get_var(dow_i,act,step)
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
                             left = random.gauss(len_cycle, len_cycle/10)

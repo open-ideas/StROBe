@@ -110,8 +110,8 @@
 'shortFlow':{'type':'tapping','owner':0.00, 'cycle_length':1, 'standby_flow':0, 'cycle_flow':1,
 	'cycle_n':10220, 'cal':0.047662, 'activity':'Presence'},
 'bathFlow':{'type':'tapping','owner':0.00,'cycle_length':10, 'standby_flow':0, 'cycle_flow':14,
-	'cycle_n':52, 'cal':0.0034955, 'activity':'WashDress'},
+	'cycle_n':52, 'cal':0.0034955, 'activity':'shower'},
 'mediumFlow':{'type':'tapping','owner':0.00,'cycle_length':1, 'standby_flow':0, 'cycle_flow':6,
 	'cycle_n':4380, 'cal':0.0312138, 'activity':'Presence'},
 'showerFlow':{'type':'tapping','owner':0.00,'cycle_length':5, 'standby_flow':0, 'cycle_flow':8,
-	'cycle_n':73, 'cal':0.012849, 'activity':'WashDress'}}
+	'cycle_n':73, 'cal':0.012849, 'activity':'shower'}}
