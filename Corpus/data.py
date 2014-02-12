@@ -7,6 +7,35 @@ Created on Thu Feb 06 09:48:07 2014
 
 import os
 import numpy as np
+import stats
+
+def get_clusters(employment, **kwargs):
+    '''
+    Find the clusters for weekdays, saturday and sunday for a household member
+    of the given eployment type based on the Crosstables given at
+    # http://homepages.vub.ac.be/~daerts/Occupancy.html
+    '''
+    #first go the the correct location
+    cdir = os.getcwd()
+    PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy\\Crosstables\\'
+    os.chdir(PATH)
+    #create an empty dictionary
+    keys = ['wkdy', 'sat', 'son']
+    cluDict = dict()
+    ##########################################################################
+    # we find the cluster for each of the daytypes for the given employment
+    # in 'Crosstable_employment.txt'
+    for i in keys:
+        order = ['U12','FTE','PTE','Unemployed','Retired','School']
+        emp_i = order.index(employment)
+        data = np.loadtxt('Outputfile_Crosstable_Employment.txt', float).T[emp_i]
+        rnd = np.random.random()
+        cluster = stats.get_probability(rnd, data[1:], p_type='prob')
+        cluDict.update({i:cluster})
+    ##########################################################################
+    # and return the final cluster id's
+    os.chdir(cdir)
+    return cluDict
 
 def get_occDict(cluster, **kwargs):
     '''
