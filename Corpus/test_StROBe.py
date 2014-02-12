@@ -45,8 +45,6 @@ class HouseholdTest(unittest.TestCase):
     def test_simulation(self):
         test = residential.Household('Example')
         test.simulate()
-        print test.n_receptacles
-        print test.n_flows 
         self.assertTrue(len(test.occ)!=0)
         print '\n'
         

@@ -350,15 +350,21 @@ class Household(object):
             power = np.zeros(nmin+1)
             radi = np.zeros(nmin+1)
             conv = np.zeros(nmin+1)
-            cluster = self.clusters[0]
             nday = self.nday
             dow = self.dow
-            occ_m = self.occ_m[0]
             result_n = dict()
+            counter = range(len(self.clusters))
             for app in self.apps:
                 # create the equipment object with data from dataset.py
                 eq = Equipment(**dataset[app])
-                r_app, n_app = eq.simulate(nday, dow, cluster, occ_m)
+                r_app = dict()
+                n_app = 0
+                # loop for all household mmembers
+                for i in counter:
+                    r_appi, n_appi = eq.simulate(nday, dow, self.clusters[i], self.occ[i])
+                    r_app = stats.sum_dict(r_app, r_appi)
+                    n_app += n_appi
+                # and sum
                 result_n.update({app:n_app})
                 power += r_app['P']
                 radi += r_app['QRad']
@@ -568,7 +574,7 @@ class Equipment(object):
                     if left <= 0:
                         # determine possibilities
                         if self.activity == 'None':
-                            prob = 1
+                            prob = 1 
                         elif self.activity == 'Presence':
                             prob = 1 if occ[to] == 1 else 0
                         else:
