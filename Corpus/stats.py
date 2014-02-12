@@ -7,7 +7,6 @@ Created on Wed Oct 09 11:57:02 2013
 
 import numpy as np
 import random
-import ast
 
 import data
 
@@ -24,6 +23,27 @@ def get_probability(rnd, prob, p_type='cum'):
     while rnd >= prob[idx-1]:
         idx += 1
     return idx
+
+def sum_dict(dict_a, dict_b):
+    '''
+    Sum the values stored under the same keys in python dictionarys.
+    '''
+    # loop through the keys and sum both values given
+    if len(dict_a.keys()) == 0:
+        sum_dict = dict_b
+    elif len(dict_b.keys()) == 0:
+        sum_dict = dict_a
+    else:
+        sum_dict = dict()
+        for key in dict_a.keys():
+            if dict_a[key] == None:
+                sum_dict.update({key:None})
+            elif key != 'time':
+                sum_dict.update({key:dict_a[key]+dict_b[key]})
+            else:
+                sum_dict.update({key:dict_a[key]})
+    # and return
+    return sum_dict
 
 class MCSA(object):
     '''
