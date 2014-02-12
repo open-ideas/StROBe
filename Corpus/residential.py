@@ -130,17 +130,10 @@ class Household(object):
             '''
             clusters = []
             # loop for every individual in the household
-            dataset = ast.literal_eval(open('Clusters.py').read())
             for ind in members:
                 if ind != 'U12':
-                    C = {}
-                    # and loop for every type of day
-                    for day in ['wkdy', 'sat', 'son']:
-                        prob = dataset[day][ind]
-                        cons = stats.get_probability(random.random(), 
-                                                     prob, p_type='prob')
-                        C.update({day : cons})
-                    clusters.append(C)
+                    clu_i = data.get_clusters(ind)
+                    clusters.append(clu_i)
             # and return the list of clusters
             return clusters
         # and run all
@@ -354,9 +347,6 @@ class Household(object):
             nmin = self.nday * 1440
             # determine all transitions of the appliances depending on the appliance
             # basic properties, ie. stochastic versus cycling power profile
-#            cdir = os.getcwd()
-#            os.chdir(cdir+'\\Activities')
-
             power = np.zeros(nmin+1)
             radi = np.zeros(nmin+1)
             conv = np.zeros(nmin+1)
@@ -364,10 +354,12 @@ class Household(object):
             nday = self.nday
             dow = self.dow
             occ_m = self.occ_m[0]
+            result_n = dict()
             for app in self.apps:
                 # create the equipment object with data from dataset.py
                 eq = Equipment(**dataset[app])
-                r_app = eq.simulate(nday, dow, cluster, occ_m)
+                r_app, n_app = eq.simulate(nday, dow, cluster, occ_m)
+                result_n.update({app:n_app})
                 power += r_app['P']
                 radi += r_app['QRad']
                 conv += r_app['QCon']
@@ -376,12 +368,12 @@ class Household(object):
             time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
     
             react = np.zeros(nmin+1)
-#            os.chdir(cdir)
 
             result = {'time':time, 'occ':None, 'P':power, 'Q':react,
                       'QRad':radi, 'QCon':conv, 'Wknds':None, 'mDHW':None}
 
             self.r_receptacles = result
+            self.n_receptacles = result_n
 
             # output ##########################################################
             # only the power load is returned
@@ -481,29 +473,28 @@ class Household(object):
         nmin = self.nday * 1440
         # determine all transitions of the appliances depending on the appliance
         # basic properties, ie. stochastic versus cycling power profile
-#        cdir = os.getcwd()
-#        os.chdir(cdir+'\\Activities')
-
         flow = np.zeros(nmin+1)
         clusterDict = self.clusters[0]
         nday = self.nday
         dow = self.dow
         occ_m = self.occ_m[0]
+        result_n = dict()
         for tap in self.taps:
             # create the equipment object with data from dataset.py
             eq = Equipment(**dataset[tap])
-            r_tap = eq.simulate(nday, dow, clusterDict, occ_m)
+            r_tap, n_tap = eq.simulate(nday, dow, clusterDict, occ_m)
+            result_n.update({tap:n_tap})
             flow += r_tap['mDHW']
         # a new time axis for power output is to be created as a different
         # time step is used in comparison to occupancy
         time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
 
-#        os.chdir(cdir)
-
         result = {'time':time, 'occ':None, 'P':None, 'Q':None,
                   'QRad':None, 'QCon':None, 'Wknds':None, 'mDHW':flow}
 
         self.r_flows = result
+        self.n_flows = result_n
+
 
         # output ##########################################################
         # only the power load is returned
@@ -566,6 +557,7 @@ class Equipment(object):
             to = -1 # time counter for occupancy
             tl = -1 # time counter for load
             left = -1 # time counter for appliance duration
+            n_fl = 0
             flow = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
                 dow_i = dow[doy]
@@ -579,14 +571,12 @@ class Equipment(object):
                             prob = 1
                         elif self.activity == 'Presence':
                             prob = 1 if occ[to] == 1 else 0
-                        elif dow[doy] > 4:
-                            occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.get_var(dow_i, act, step)
                         else:
                             occs = 1 if occ[to] == 1 else 0
                             prob = occs * actdata.get_var(dow_i, act, step)
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
+                            n_fl += 1
                             left = random.gauss(len_cycle, len_cycle/10)
                             flow[tl] += self.standby_flow
                     else:
@@ -596,7 +586,7 @@ class Equipment(object):
             r_fl = {'time':time, 'occ':None, 'P':None, 'Q':None, 'QRad':None, 
                       'QCon':None, 'Wknds':None, 'mDHW':flow}
                             
-            return r_fl
+            return r_fl, n_fl
 
         def stochastic_load(self, nday, dow, clusterDict, occ):
             '''
@@ -621,6 +611,7 @@ class Equipment(object):
             to = -1 # time counter for occupancy
             tl = -1 # time counter for load
             left = -1 # time counter for appliance duration
+            n_eq = 0
             P = np.zeros(minutes+1)
             Q = np.zeros(minutes+1)
             for doy, step in itertools.product(range(nday), range(nbin)):
@@ -635,14 +626,12 @@ class Equipment(object):
                             prob = 1
                         elif self.activity == 'Presence':
                             prob = 1 if occ[to] == 1 else 0
-                        elif dow[doy] > 4:
-                            occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.get_var(dow_i, act, step)
                         else:
                             occs = 1 if occ[to] == 1 else 0
                             prob = occs * actdata.get_var(dow_i, act, step)
                         # check if there is a statechange in the appliance
                         if random.random() < prob * self.cal:
+                            n_eq += 1
                             left = random.gauss(len_cycle, len_cycle/10)
                             P[tl] += self.standby_power
                     else:
@@ -652,7 +641,7 @@ class Equipment(object):
             r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad, 
                       'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
                             
-            return r_eq
+            return r_eq, n_eq
 
         def cycle_load(self, nday):
             '''
@@ -663,9 +652,11 @@ class Equipment(object):
             nbin = nday*24*60
             P = np.zeros(nbin+1)
             Q = np.zeros(nbin+1)
+            n_eq = 0
             left = random.gauss(self.delay, self.delay/4)
             for tl in range(nbin+1):
                 if left <= 0:
+                    n_eq += 1
                     left += self.cycle_length
                     P[tl] = self.cycle_power
                 else:
@@ -675,15 +666,15 @@ class Equipment(object):
             r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad, 
                       'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
                             
-            return r_eq
+            return r_eq, n_eq
 
         if self.type == 'appliance':
             #check if the equipment is an appliance instead of tapping point
             if self.delay == 0:
-                r_app = stochastic_load(self, nday, dow, cluster, occ)
+                r_app, n_app = stochastic_load(self, nday, dow, cluster, occ)
             else:
-                r_app = cycle_load(self, nday)
+                r_app, n_app = cycle_load(self, nday)
         else:
-            r_app = stochastic_flow(self, nday, dow, cluster, occ)
+            r_app, n_app = stochastic_flow(self, nday, dow, cluster, occ)
 
-        return r_app
+        return r_app, n_app

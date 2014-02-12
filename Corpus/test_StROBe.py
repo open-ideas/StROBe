@@ -8,6 +8,7 @@ Created on Wed Oct 09 15:36:23 2013
 import os
 import unittest
 import residential
+import pylab as pl
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(DIR)+'\\Data')
@@ -44,6 +45,8 @@ class HouseholdTest(unittest.TestCase):
     def test_simulation(self):
         test = residential.Household('Example')
         test.simulate()
+        print test.n_receptacles
+        print test.n_flows 
         self.assertTrue(len(test.occ)!=0)
         print '\n'
         
