@@ -8,7 +8,7 @@ Created on Wed Oct 09 15:36:23 2013
 import os
 import unittest
 import residential
-import pylab as pl
+import cPickle
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(DIR)+'\\Data')
@@ -47,6 +47,15 @@ class HouseholdTest(unittest.TestCase):
         test.simulate()
         self.assertTrue(len(test.occ)!=0)
         print '\n'
+
+    def test_pickle(self):
+        test = residential.Household('Example')
+        test.simulate()
+        test.pickle()
+        bistest = cPickle.load(open('Example.p','rb'))
+        self.assertTrue(len(bistest.occ)!=0)
+        print '\n'
+
         
 class CommunityTest(unittest.TestCase):
     '''
