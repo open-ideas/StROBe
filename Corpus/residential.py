@@ -520,6 +520,13 @@ class Household(object):
         setting = []
         return setting
 
+    def pickle(self):
+        '''
+        Pickle the generated profile and its results for storing later.
+        '''
+        cPickle.dump(self, open(self.name+'.p','wb'))
+
+
     def summarize(self):
         '''
         Create proper summary for later-on creating IDEAS simulations input.
@@ -557,7 +564,6 @@ class Equipment(object):
 
             # script ##########################################################
             # a yearly simulation is basic, also in a unittest
-#            corr = 1.1
             nbin = 144 
             minutes = nday * 1440
             to = -1 # time counter for occupancy
