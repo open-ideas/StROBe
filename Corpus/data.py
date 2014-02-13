@@ -44,6 +44,7 @@ def get_occDict(cluster, **kwargs):
     and stored in 'StROBe/Data/Aerts_Occupancy'.
     '''
     #first go the the correct location
+    cdir = os.getcwd()
     DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
     PATH = DATA_PATH + '\\Pattern' + str(cluster)
     os.chdir(PATH)
@@ -78,6 +79,7 @@ def get_occDict(cluster, **kwargs):
         occDict.update({'ol_'+str(i+1):ol_i})
     ##########################################################################
     # and return the final occDict
+    os.chdir(cdir)
     return occDict
 
 def get_actDict(cluster, **kwargs):
@@ -87,6 +89,7 @@ def get_actDict(cluster, **kwargs):
     and stored in 'StROBe/Data/Aerts_activity'.
     '''
     #first go the the correct location
+    cdir = os.getcwd()
     DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Activities'
     os.chdir(DATA_PATH)
     # create an empty dictionary
@@ -105,4 +108,5 @@ def get_actDict(cluster, **kwargs):
     ##########################################################################
     # and return the final actDict
     actDict.update({'period':600, 'steps':144})
+    os.chdir(cdir)
     return actDict
