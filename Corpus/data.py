@@ -25,13 +25,13 @@ def get_clusters(employment, **kwargs):
     ##########################################################################
     # we find the cluster for each of the daytypes for the given employment
     # in 'Crosstable_employment.txt'
-    for i in keys:
+    for key in keys:
         order = ['U12','FTE','PTE','Unemployed','Retired','School']
         emp_i = order.index(employment)
-        data = np.loadtxt('Outputfile_Crosstable_Employment.txt', float).T[emp_i]
+        data = np.loadtxt('Crosstable_Employment_'+key+'.txt', float).T[emp_i]
         rnd = np.random.random()
         cluster = stats.get_probability(rnd, data[1:], p_type='prob')
-        cluDict.update({i:cluster})
+        cluDict.update({key:cluster})
     ##########################################################################
     # and return the final cluster id's
     os.chdir(cdir)
