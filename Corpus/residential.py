@@ -162,6 +162,7 @@ class Household(object):
         self.__occupancy__()
         self.__plugload__()
         self.__dhwload__()
+        self.__shsetting__()
 
     def __chronology__(self, year):
         '''
@@ -517,8 +518,60 @@ class Household(object):
         - starting from a regular monday at 4:00 AM.
         '''
 
-        setting = []
-        return setting
+        #######################################################################
+        # we define setting types based on their setpoint temperatures when
+        # when being active (1), sleeping (2) or absent (3).
+        types = dict()
+        types.update({'2' : {1:18.5, 2:15.0, 3:18.5}})
+        types.update({'3' : {1:20.0, 2:15.0, 3:19.5}})
+        types.update({'4' : {1:20.0, 2:11.0, 3:19.5}})
+        types.update({'5' : {1:20.0, 2:14.5, 3:15.0}})
+        types.update({'6' : {1:21.0, 2:20.5, 3:21.0}})
+        types.update({'7' : {1:21.5, 2:15.5, 3:21.5}})
+        # and the probabilities these types occur based on Duth research,
+        # i.e. Leidelmeijer and van Grieken (2005).
+        types.update({'prob' : [0.16, 0.35, 0.08, 0.11, 0.05, 0.20]})
+        # and given a type, denote which rooms are heated
+        given = dict()
+        given.update({'2' : ['dayzone','bathroom']})
+        given.update({'3' : [['dayzone'],['dayzone','bathroom'],['dayzone','nightzone']]})
+        given.update({'4' : [['dayzone'],['dayzone','nightzone']]})
+        given.update({'5' : ['dayzone']})
+        given.update({'6' : ['dayzone','bathroom','nightzone']})
+        given.update({'7' : ['dayzone','bathroom']})
+        
+        #######################################################################
+        # select a type from the given tipes and probabilities
+        rnd = np.random.random()
+        shtype = str(1 + stats.get_probability(rnd, types['prob'], 'prob'))
+        if len(np.shape(given[shtype])) != 1:
+            nr = np.random.randint(np.shape(given[shtype])[0])
+            shrooms = given[shtype][nr]
+        else:
+            shrooms = given[shtype]
+
+        #######################################################################
+        # create a profile for he heated rooms
+        shnon = 12*np.ones(len(self.occ_m))
+        shset = self.occ_m[0]
+        for key in types[shtype].keys():
+            for i in range(len(shset)):
+                if int(shset[i]) == key:
+                    shset[i] = types[shtype][key]
+        print shset
+
+        #######################################################################
+        # and couple to the heated rooms            
+        sh_settings = dict()
+        for room in ['dayzone', 'nightzone', 'bathroom']:
+            if room in shrooms:
+                sh_settings.update({room:shset})
+            else:
+                sh_settings.update({room:shnon})
+        # and store
+        self.sh_settings = sh_settings
+        print ' - Average comfort setting is %s Celsius' % str(round(np.average(sh_settings['dayzone']),2))
+        return None
 
     def pickle(self):
         '''
