@@ -8,6 +8,7 @@ Created on Wed Oct 09 15:36:23 2013
 import os
 import unittest
 import residential
+import feeder
 import cPickle
 
 DIR = os.path.dirname(os.path.realpath(__file__))
@@ -56,14 +57,27 @@ class HouseholdTest(unittest.TestCase):
         self.assertTrue(len(bistest.occ)!=0)
         print '\n'
 
+class FeederTest(unittest.TestCase):
+    '''
+    Testing of the IDEAS_Feeder class
+    '''
+    
+    def setUp(self):
+        self.name = 'Example'
+        
+    def test_creation1(self):
+        test = feeder.IDEAS_Feeder(self.name, 2)
+        self.assertEqual(test.name, self.name)
+        print '\n'
+
         
 class CommunityTest(unittest.TestCase):
     '''
-    Testing the community class.
+    Testing the community class.²
     '''
 
 if __name__ == '__main__':
-    suite1 = unittest.TestLoader().loadTestsFromTestCase(HouseholdTest)
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(FeederTest)
     #suite2 = ...
     alltests = unittest.TestSuite([suite1])
     unittest.TextTestRunner(verbosity=1).run(alltests)

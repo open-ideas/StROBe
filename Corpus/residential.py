@@ -18,32 +18,6 @@ import itertools
 import stats
 import data
 
-class Community(object):
-    '''
-    The Community class defines a set of hosueholds.
-    '''
-    
-    def __init__(self, name, **kwargs):
-        '''
-        Initiation of Community object.
-        '''
-        
-        return None
-
-    def simulate(self):
-        '''
-        Simulation of the Community object.
-        '''
-        
-        return None
-        
-    def output(self):
-        '''
-        Output of the simulation results for IDEAS.mo-simulation.
-        '''
-        
-        return None
-
 
 class Household(object):
     '''
@@ -552,13 +526,12 @@ class Household(object):
 
         #######################################################################
         # create a profile for he heated rooms
-        shnon = 12*np.ones(len(self.occ_m))
-        shset = self.occ_m[0]
+        shnon = 12*np.ones(len(self.occ_m[0])+1)
+        shset = np.hstack((self.occ_m[0],self.occ_m[0][-1]))
         for key in types[shtype].keys():
             for i in range(len(shset)):
                 if int(shset[i]) == key:
                     shset[i] = types[shtype][key]
-        print shset
 
         #######################################################################
         # and couple to the heated rooms            
@@ -573,18 +546,22 @@ class Household(object):
         print ' - Average comfort setting is %s Celsius' % str(round(np.average(sh_settings['dayzone']),2))
         return None
 
+    def roundUp(self):
+        self.sh_day = self.sh_settings['dayzone']
+        self.sh_night = self.sh_settings['nightzone']
+        self.sh_bath = self.sh_settings['bathroom']
+        self.P = self.r_receptacles['P'] + self.r_lighting['P']
+        self.Q = self.r_receptacles['Q'] + self.r_lighting['Q']
+        self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad']
+        self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon']
+        self.mDHW = self.r_flows['mDHW']
+        return None
+
     def pickle(self):
         '''
         Pickle the generated profile and its results for storing later.
         '''
         cPickle.dump(self, open(self.name+'.p','wb'))
-
-
-    def summarize(self):
-        '''
-        Create proper summary for later-on creating IDEAS simulations input.
-        '''
-        
         return None
 
 class Equipment(object):
