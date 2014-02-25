@@ -66,7 +66,7 @@ class FeederTest(unittest.TestCase):
         self.name = 'Example'
         
     def test_creation1(self):
-        test = feeder.IDEAS_Feeder(self.name, 2)
+        test = feeder.IDEAS_Feeder(self.name, 2, r'E:\3_PhD\6_Python\Test')
         self.assertEqual(test.name, self.name)
         print '\n'
 

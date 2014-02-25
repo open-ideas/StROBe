@@ -7,14 +7,15 @@ Created on Mon Feb 24 11:39:35 2014
 
 import residential
 import cPickle
-import numpy as np 
+import numpy as np
+import os
 
 class IDEAS_Feeder(object):
     '''
     The Community class defines a set of hosueholds.
     '''
     
-    def __init__(self, name, nBui):
+    def __init__(self, name, nBui, path):
         '''
         Create the community based on number of households and simulate for
         output towards IDEAS model.
@@ -22,9 +23,10 @@ class IDEAS_Feeder(object):
         self.name = name
         self.nBui = nBui
         # we create, simulate and pickle all 'nBui' buildings
-        self.simulate()
+        self.simulate(path)
         # then we loop through all variables and output as single file
         # for reading in IDEAS.mo
+        os.chdir(path)
         variables = ['P','Q','QRad','QCon','mDHW','sh_day','sh_bath','sh_night']
         for var in variables:
             self.output(var)
@@ -32,18 +34,21 @@ class IDEAS_Feeder(object):
         print '\n'
         print ' - Feeder %s outputted.' % str(self.name)
 
-    def simulate(self):
+    def simulate(self, path):
         '''
         Simulate all households in the depicted feeder
         '''
         #######################################################################
         # we loop through all households for creation, simulation and pickling.
         # whereas the output is done later-on.
+        cwd = os.getcwd()
         for i in range(self.nBui):
             hou = residential.Household(str(self.name)+'_'+str(i))
             hou.simulate()
             hou.roundUp()
+            os.chdir(path)
             hou.pickle()
+            os.chdir(cwd)
 
     def output(self, variable):
         '''
