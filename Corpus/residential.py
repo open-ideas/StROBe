@@ -547,6 +547,12 @@ class Household(object):
         return None
 
     def roundUp(self):
+        '''
+        Round the simulation by wrapping all data and reduce storage size.
+        '''
+
+        #######################################################################
+        # first we move and sumarize data to the most upper level.
         self.sh_day = self.sh_settings['dayzone']
         self.sh_night = self.sh_settings['nightzone']
         self.sh_bath = self.sh_settings['bathroom']
@@ -555,6 +561,16 @@ class Household(object):
         self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad']
         self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon']
         self.mDHW = self.r_flows['mDHW']
+
+        #######################################################################
+        # then we delete the old data structure to save space
+        del self.sh_settings
+        del self.r_receptacles
+        del self.r_lighting
+        del self.r_flows
+
+        #######################################################################
+        # and end
         return None
 
     def pickle(self):
