@@ -1,3 +1,4 @@
+households = \
 {1: ['FTE'],
  2: ['Retired'],
  3: ['Unemployed'],

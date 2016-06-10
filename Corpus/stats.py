@@ -13,7 +13,7 @@ import data
 
 def get_probability(rnd, prob, p_type='cum'):
     '''
-    Find the x-value in a given comulative probability 'prob_cum' based on a 
+    Find the x-value in a given comulative probability 'prob_cum' based on a
     given random y-value 'rnd'.
     '''
     if p_type != 'cum':
@@ -68,7 +68,7 @@ class MCSA(object):
         state = get_probability(random.random(), probs)
         # and retrun the value
         return int(state)
-    
+
     def transition(self, state, timebin):
         '''
         Get next occupancy state from current state ending at time.
@@ -78,7 +78,7 @@ class MCSA(object):
         newoc = get_probability(random.random(), probs)
         # and retrun the value
         return int(newoc)
-    
+
     def duration(self, state, timebin):
         '''
         Get the duration of current state started at time.
