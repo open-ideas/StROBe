@@ -29,7 +29,6 @@ def simulate_scenarios(n_scen, ndays):
     for i in xrange(n_scen):
         print "Generate scenario {}".format(i)
         family.simulate(2013, ndays)
-        # occupancy[i, :] = convert_occupancy(family.occ)
 
         # aggregate scenarios:
         family.roundUp()

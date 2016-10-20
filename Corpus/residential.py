@@ -88,7 +88,7 @@ class Household(object):
             for app in set_appliances:
                 if set_appliances[app]['type'] == 'appliance':
                     obj = Equipment(**set_appliances[app])
-                    owner = obj.owner <= random.random()
+                    owner = obj.owner >= random.random()
                     app_n.append(app) if owner else None
             return app_n
 
@@ -407,7 +407,7 @@ class Household(object):
                 to += 1
                 for run in range(0, 10):
                     tl += 1
-                    if occ_m[to] == int(1) or (irr[tl] >= irr_max):
+                    if occ_m[to] > int(1) or (irr[tl] >= irr_max):
                         pow_id[tl] = 0
                     else:
                         pow_id[tl] = power_max*(1 - irr[tl]/irr_max)
