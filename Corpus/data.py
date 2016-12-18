@@ -17,7 +17,7 @@ def get_clusters(employment, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy\\Crosstables\\'
+    PATH = '..\\Data\\Aerts_Occupancy\\Crosstables\\'
     os.chdir(PATH)
     #create an empty dictionary
     keys = ['wkdy', 'sat', 'son']
@@ -45,7 +45,7 @@ def get_occDict(cluster, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
+    DATA_PATH = '..\\Data\\Aerts_Occupancy'
     PATH = DATA_PATH + '\\Pattern' + str(cluster)
     os.chdir(PATH)
     # create an empty dictionary
@@ -90,7 +90,7 @@ def get_actDict(cluster, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Activities'
+    DATA_PATH = '..\\Data\\Aerts_Activities'
     os.chdir(DATA_PATH)
     # create an empty dictionary
     actDict = dict()

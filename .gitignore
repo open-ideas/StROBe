@@ -1,1 +1,5 @@
 *.pyc
+.idea/
+Corpus/Untitled.ipynb
+Corpus/.ipynb_checkpoints/
+*.p

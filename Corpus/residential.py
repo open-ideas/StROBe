@@ -374,7 +374,7 @@ class Household(object):
             # levels which determine the need for lighting if occupant.
             # The loaded solar data represent the global horizontal radiation
             # at a time-step of 1-minute for Uccle, Belgium
-            os.chdir(r'E:\\3_PhD\\6_Python\\StROBe\\Data')
+            os.chdir(r'..\\Data')
             file = open('Climate\\irradiance.txt','r')
             data_pickle = file.read()
             file.close()
