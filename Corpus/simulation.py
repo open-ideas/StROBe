@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Simulate scenarios at district level."""
+"""Simulate demand scenarios at buildings level."""
 
 import numpy as np
 from residential import Household
 
 
 def convert_occupancy(occ):
+    """Convert occupancy as number of inhabitants currently in house."""
     for i in xrange(len(occ)):
         arr = occ[i]
         arr[arr < 3] = 1
@@ -16,6 +17,32 @@ def convert_occupancy(occ):
 
 
 def simulate_scenarios(n_scen, ndays):
+    """Simulate scenarios of demands during ndays.
+
+    Parameters
+    ----------
+    n_scen : int
+        Number of scenarios to generate
+
+    ndays : int
+        Number of days to consider
+
+
+    Returns
+    -------
+    elec : numpy array, shape (n_scen, nminutes)
+        Electrical demands scenarios, sampled at
+        minute time-step
+
+    mDHW : numpy array, shape (n_scen, nminutes)
+        DHW demands scenarios, sampled at
+        minute time-step
+
+    occupancy : numpy array, shape (n_scen, tenminutes)
+        DHW demands scenarios, sampled at a
+        10 minute time-step
+
+    """
 
     nminutes = ndays * 1440 + 1
     ntenm = ndays * 144
