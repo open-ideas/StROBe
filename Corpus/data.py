@@ -17,7 +17,7 @@ def get_clusters(employment, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy\\Crosstables\\'
+    PATH = '../Data/Aerts_Occupancy/Crosstables/'
     os.chdir(PATH)
     #create an empty dictionary
     keys = ['wkdy', 'sat', 'son']
@@ -45,21 +45,21 @@ def get_occDict(cluster, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Occupancy'
-    PATH = DATA_PATH + '\\Pattern' + str(cluster)
+    DATA_PATH = '../Data/Aerts_Occupancy'
+    PATH = DATA_PATH + '/Pattern' + str(cluster)
     os.chdir(PATH)
     # create an empty dictionary
     occDict = dict()
     ##########################################################################
     # first we load the occupancy start states 'oss' from StartStates.txt
-    ss = dict()    
+    ss = dict()
     data = np.loadtxt('StartStates.txt', float)
     for i in range(len(data)):
         ss.update({str(i+1):data[i]})
     # and add the 'oss' data to the occupancy dictionary
     occDict.update({'ss':ss})
     ##########################################################################
-    # Second we load the occupancy transitions state probabilities 'osn' 
+    # Second we load the occupancy transitions state probabilities 'osn'
     # from TransitionProbability.txt
     data = np.loadtxt('TransitionProbability.txt', float)
     for i in range(3):
@@ -90,16 +90,16 @@ def get_actDict(cluster, **kwargs):
     '''
     #first go the the correct location
     cdir = os.getcwd()
-    DATA_PATH = 'E:\\3_PhD\\6_Python\\StROBe\\Data\\Aerts_Activities'
+    DATA_PATH = '../Data/Aerts_Activities'
     os.chdir(DATA_PATH)
     # create an empty dictionary
     actDict = dict()
     ##########################################################################
     # first we define the dictionary used as legend for the load file
-    act = {0:'pc', 1:'food', 2:'vacuum', 3:'iron', 4:'tv', 5:'audio', 
+    act = {0:'pc', 1:'food', 2:'vacuum', 3:'iron', 4:'tv', 5:'audio',
            6:'dishes', 7:'washing', 8:'drying', 9:'shower'}
     ##########################################################################
-    # Second we load the activity proclivity functions 'agn' 
+    # Second we load the activity proclivity functions 'agn'
     # from Patter*cluster*.txt
     FILNAM = 'Pattern'+str(cluster)+'.txt'
     data = np.loadtxt(FILNAM, float)
