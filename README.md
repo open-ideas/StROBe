@@ -14,12 +14,12 @@ lighting, space heating settings and domestic hot water redrawals.
 For more information on the implementation, see the [GitHub Wiki]
 (https://github.com/rubenbaetens/ProclivityPy/wiki).
 
-###Dependencies
+### Dependencies
 
 **StROBe** is implemented in Python and uses the packages Os, Numpy, Random, Time, Datetime and Ast, which are
 all generally available.
 
-###Examples
+### Examples
 
 ```python
 family = Household("Example family")
