@@ -72,7 +72,7 @@ class Household(object):
                     raise TypeError('Given membertypes is no List of strings.')
             # If no types are given, random statististics are applied
             else:
-                key = random.randint(0, len(households))
+                key = random.randint(1, len(households))
                 members = households[key]
             # And return the members as list fo strings
             return members
