@@ -71,5 +71,5 @@ class IDEAS_Feeder(object):
         tim = np.linspace(0,31536000,len(dat[0]))
         dat = np.vstack((tim,dat))
         hea ='#1 \n double data('+str(int(len(dat[0])))+','+str(self.nBui+1)+')'
-        np.savetxt(fname=variable+'.txt', X=dat.T, header=hea)
+        np.savetxt(fname=variable+'.txt', X=dat.T, header=hea,comments='', fmt='%.10g')
 
