@@ -100,7 +100,7 @@ class DTMC(object):
         self.ds = dict()
         for i in range(5):
             self.ds.update({i:data.get_actDict(clusterDict['wkdy'])})
-        self.ds.update({5:data.get_actDict(clusterDict['son'])})
+        self.ds.update({5:data.get_actDict(clusterDict['sat'])})
         self.ds.update({6:data.get_actDict(clusterDict['son'])})
     def get_var(self, dow, act, step):
         # get the probability of the given activity for daytype dow at step
