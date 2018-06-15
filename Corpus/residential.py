@@ -414,7 +414,7 @@ class Household(object):
                     # determine all transitions of appliances depending on
                     # the appliance basic properties, ie. stochastic versus
                     # cycling power profile
-                    if occ_m[to] == 0:
+                    if occ_m[to] > int(1):
                         P[tl] = pow_id[tl]
                     elif random.random() <= prob_adj:
                         delta = P[tl-1] - pow_id[tl]
@@ -639,7 +639,7 @@ class Equipment(object):
                         if random.random() < prob * self.cal:
                             n_fl += 1
                             left = random.gauss(len_cycle, len_cycle/10)
-                            flow[tl] += self.standby_flow
+                        flow[tl] += self.standby_flow
                     else:
                         left += -1
                         flow[tl] += self.cycle_flow
@@ -694,7 +694,7 @@ class Equipment(object):
                         if random.random() < prob * self.cal:
                             n_eq += 1
                             left = random.gauss(len_cycle, len_cycle/10)
-                            P[tl] += self.standby_power
+                        P[tl] += self.standby_power
                     else:
                         left += -1
                         P[tl] += self.cycle_power
