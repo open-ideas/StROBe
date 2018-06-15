@@ -36,7 +36,7 @@ def sum_dict(dict_a, dict_b):
     else:
         sum_dict = dict()
         for key in dict_a.keys():
-            if dict_a[key] == None:
+            if dict_a[key] is None:
                 sum_dict.update({key:None})
             elif key != 'time':
                 sum_dict.update({key:dict_a[key]+dict_b[key]})
