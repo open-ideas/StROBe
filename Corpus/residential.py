@@ -72,7 +72,7 @@ class Household(object):
                     raise TypeError('Given membertypes is no List of strings.')
             # If no types are given, random statististics are applied
             else:
-                key = random.randint(0, len(households))
+                key = random.randint(1, len(households))
                 members = households[key]
             # And return the members as list fo strings
             return members
@@ -350,7 +350,7 @@ class Household(object):
                 conv += r_app['QCon']
             # a new time axis for power output is to be created as a different
             # time step is used in comparison to occupancy
-            time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
+            time = 4*60*60 + np.arange(0, (nmin+1)*60, 60)
 
             react = np.zeros(nmin+1)
 
@@ -378,12 +378,15 @@ class Household(object):
             # levels which determine the need for lighting if occupant.
             # The loaded solar data represent the global horizontal radiation
             # at a time-step of 1-minute for Uccle, Belgium
+            # Since the data starts at midnight, a shift to 4am is necessary
+            # so that it coincides with the occupancy data!!!
+            # the first 4 h are moved to the end. 
             os.chdir(r'../Data')
             file = open('Climate/irradiance.txt','r')
             data_pickle = file.read()
             file.close()
             irr = cPickle.loads(data_pickle)
-
+            irr = np.roll(irr,-240) # brings first 4h to end
             # script ##########################################################
             # a yearly simulation is basic, also in a unittest
             nday = self.nday
@@ -393,7 +396,7 @@ class Household(object):
             # the model is found on an ideal power level power_id depending on
             # irradiance level and occupancy (but not on light switching
             # behavior of occupants itself)
-            time = np.arange(0, (minutes+1)*60, 60)
+            time = 4*60*60 + np.arange(0, (minutes+1)*60, 60)
             to = -1 # time counter for occupancy
             tl = -1 # time counter for minutes in lighting load
             power_max = 200
@@ -471,7 +474,7 @@ class Household(object):
             flow += r_tap['mDHW']
         # a new time axis for power output is to be created as a different
         # time step is used in comparison to occupancy
-        time = 4*60*600 + np.arange(0, (nmin+1)*60, 60)
+        time = 4*60*60 + np.arange(0, (nmin+1)*60, 60)
 
         result = {'time':time, 'occ':None, 'P':None, 'Q':None,
                   'QRad':None, 'QCon':None, 'Wknds':None, 'mDHW':flow}
@@ -496,7 +499,7 @@ class Household(object):
         '''
 
         #######################################################################
-        # we define setting types based on their setpoint temperatures when
+        # we define setting types based on their setpoint temperatures 
         # when being active (1), sleeping (2) or absent (3).
         types = dict()
         types.update({'2' : {1:18.5, 2:15.0, 3:18.5}})
@@ -505,30 +508,30 @@ class Household(object):
         types.update({'5' : {1:20.0, 2:14.5, 3:15.0}})
         types.update({'6' : {1:21.0, 2:20.5, 3:21.0}})
         types.update({'7' : {1:21.5, 2:15.5, 3:21.5}})
-        # and the probabilities these types occur based on Duth research,
+        # and the probabilities these types occur based on Dutch research,
         # i.e. Leidelmeijer and van Grieken (2005).
         types.update({'prob' : [0.16, 0.35, 0.08, 0.11, 0.05, 0.20]})
         # and given a type, denote which rooms are heated
         given = dict()
-        given.update({'2' : ['dayzone','bathroom']})
+        given.update({'2' : [['dayzone','bathroom']]})
         given.update({'3' : [['dayzone'],['dayzone','bathroom'],['dayzone','nightzone']]})
         given.update({'4' : [['dayzone'],['dayzone','nightzone']]})
-        given.update({'5' : ['dayzone']})
-        given.update({'6' : ['dayzone','bathroom','nightzone']})
-        given.update({'7' : ['dayzone','bathroom']})
+        given.update({'5' : [['dayzone']]})
+        given.update({'6' : [['dayzone','bathroom','nightzone']]})
+        given.update({'7' : [['dayzone','bathroom']]})
 
         #######################################################################
-        # select a type from the given tipes and probabilities
+        # select a type from the given types and probabilities
         rnd = np.random.random()
         shtype = str(1 + stats.get_probability(rnd, types['prob'], 'prob'))
-        if len(np.shape(given[shtype])) != 1:
+        if len(given[shtype]) != 1:
             nr = np.random.randint(np.shape(given[shtype])[0])
             shrooms = given[shtype][nr]
         else:
-            shrooms = given[shtype]
+            shrooms = given[shtype][0]
 
         #######################################################################
-        # create a profile for he heated rooms
+        # create a profile for the heated rooms
         shnon = 12*np.ones(len(self.occ_m[0])+1)
         shset = np.hstack((self.occ_m[0],self.occ_m[0][-1]))
         for key in types[shtype].keys():
@@ -564,6 +567,17 @@ class Household(object):
         self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad']
         self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon']
         self.mDHW = self.r_flows['mDHW']
+
+        #######################################################################        
+        # bring last 4 h to the front so that data starts at midnight
+        self.sh_day = np.roll(self.sh_day,24)
+        self.sh_night = np.roll(self.sh_night,24)
+        self.sh_bath = np.roll(self.sh_bath,24)
+        self.P = np.roll(self.P,240)
+        self.Q = np.roll(self.Q,240)
+        self.QRad = np.roll(self.QRad,240)
+        self.QCon = np.roll(self.QCon,240)
+        self.mDHW = np.roll(self.mDHW,240)
 
         #######################################################################
         # then we delete the old data structure to save space
