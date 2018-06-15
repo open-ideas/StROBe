@@ -1,15 +1,15 @@
 import os
-import pandas as pd
+
+import Corpus.feeder as fee
+import Corpus.residential as res
+
 strobeDir = os.path.dirname(os.path.realpath(__file__))
 os.chdir(strobeDir + '\\Corpus\\')
 
-import residential
-import feeder
-import ast
-os.chdir(strobeDir+ "\\Data\\")
+os.chdir(strobeDir + "\\Data\\")
 
-family = residential.Household("Example family")
+family = res.Household("Example family")
 family.parameterize()
 family.simulate()
 
-feeder.IDEAS_Feeder('Example',5,strobeDir)
+fee.IDEAS_Feeder('Example', 5, strobeDir)
