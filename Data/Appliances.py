@@ -397,7 +397,7 @@ set_appliances = \
     "standby_flow": 0, 
     "activity": "shower", 
     "type": "tapping", 
-    "cycle_n": 73, 
+    "cycle_n": 730, 
     "cycle_flow": 8
   }, 
   "WashingMachine": {
