@@ -721,22 +721,40 @@ class Equipment(object):
         def cycle_load(self, nday):
             '''
             Simulate cycling appliances, eg. fridges and freezers based on
-            average clycle length
+            average clycle length and delay between cycles
             '''
 
             nbin = nday*24*60
             P = np.zeros(nbin+1)
-            Q = np.zeros(nbin+1)
-            n_eq = 0
-            left = random.gauss(self.delay, self.delay/4)
-            for tl in range(nbin+1):
-                if left <= 0:
-                    n_eq += 1
-                    left += self.cycle_length
-                    P[tl] = self.cycle_power
-                else:
-                    left += -1
-                    P[tl] = self.standby_power
+            Q = np.zeros(nbin+1) #currently no data included (remains zero)
+            n_eq = 0 # number of cycles for calibration of `cal` parameter of appliance
+            
+            # define length of cycles (same for entire year, assumed to depend on appliance)
+            len_cycle=random.gauss(self.cycle_length, self.cycle_length/10)
+            # define duration of break between cycles (same for entire year)
+            delay=random.gauss(self.delay, self.delay/4)
+            
+            # start as OFF (assumption)
+            on=False #is it ON? 
+            left = delay # time left until change of state
+                       
+            for tl in range(nbin+1): # loop over every minute of the year
+                # if there is time LEFT until change of state, remain as is
+                # if time is up, change state:  
+                if left <= 0:  
+                    on=not on # switch to opposite state ON/OFF
+                    if on: # if switched ON
+                        n_eq += 1 # add one to cycle counter
+                        left = len_cycle #start counting 1 cycle length          
+                    else: # if switched OFF
+                        left = delay #start counting time until next cycle
+                # either way, count downt the time until next change of state    
+                left += -1  
+                # allocate correct power, depending on current state ON/OFF       
+                if on: 
+                    P[tl] = self.cycle_power # instead of the average consumption, could be sampled from normal distribution as well
+                else: 
+                    P[tl] = self.standby_power 
 
             r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad,
                       'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
