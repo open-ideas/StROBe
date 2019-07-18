@@ -26,7 +26,7 @@ def get_probability(rnd, prob, p_type='cum'):
 
 def sum_dict(dict_a, dict_b):
     '''
-    Sum the values stored under the same keys in python dictionarys.
+    Sum the values stored under the same keys in python dictionaries.
     '''
     # loop through the keys and sum both values given
     if len(dict_a.keys()) == 0:
