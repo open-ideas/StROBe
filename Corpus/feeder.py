@@ -28,8 +28,7 @@ class IDEAS_Feeder(object):
         # for reading in IDEAS.mo
         os.chdir(path)
         variables = ['P','Q','QRad','QCon','mDHW','sh_day','sh_bath','sh_night']
-        for var in variables:
-            self.output(var)
+        self.output(variables)
         # and conclude
         print '\n'
         print ' - Feeder %s outputted.' % str(self.name)
@@ -50,26 +49,35 @@ class IDEAS_Feeder(object):
             hou.pickle()
             os.chdir(cwd)
 
-    def output(self, variable):
+    def output(self, variables):
         '''
-        Output the variable for the dwellings in the feeder as a *.txt readable
+        Output the variables for the dwellings in the feeder as a *.txt readable
         for Modelica.
         '''
         #######################################################################
-        # we loop through all households for loading the depicted variable data
-        # which is stored in the object pickle.
-        dat = np.zeros(0)
+        # we loop through all households for loading all variables 
+        # which are stored in the object pickle.
+        print ('loading pickled household objects')
+        dat=dict.fromkeys(variables,[])
         for i in range(self.nBui):
+         #   print(i)
             hou = cPickle.load(open(str(self.name)+'_'+str(i)+'.p','rb'))
-            var = eval('hou.'+variable)
-            if len(dat) != 0:
-                dat = np.vstack((dat,var))
-            else:
-                dat = var
+            for variable in variables:       
+                var = eval('hou.'+variable)
+                if len(dat[variable]) != 0:
+                    dat[variable] = np.vstack((dat[variable],var))
+                else:
+                    dat[variable] = var
+        
+        
         #######################################################################
         # and output the array to txt
-        tim = np.linspace(0,31536000,len(dat[0]))
-        dat = np.vstack((tim,dat))
-        hea ='#1 \n double data('+str(int(len(dat[0])))+','+str(self.nBui+1)+')'
-        np.savetxt(fname=variable+'.txt', X=dat.T, header=hea,comments='', fmt='%.10g')
+        print ('writing')
+        for variable in variables:
+            print (variable)
+            tim = np.linspace(0,31536000,dat[variable].shape[1])
+            data = np.vstack((tim,dat[variable]))
+            hea ='#1 \ndouble data('+str(int(data.shape[1]))+','+str(int(data.shape[0]))+')'
+            np.savetxt(fname=variable+'.txt', X=data.T, header=hea,comments='', fmt='%.10g')
+
 
