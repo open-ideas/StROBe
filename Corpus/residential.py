@@ -23,6 +23,17 @@ sys.path.append("..")
 from Data.Households import households
 from Data.Appliances import set_appliances
 
+#changes for new cold-appliance fix #######################################
+# Based on 10000 runs, these new values combined with rule-based fix (see in def appliances)
+# lead to the same overall ownership as the original values.
+# We change it here so that the original remain in the Appliances file.
+#tset_appliances['Refrigerator']['owner']=0.27     # original:  0.430
+#set_appliances['FridgeFreezer']['owner']=0.40    # original:  0.651
+#set_appliances['ChestFreezer']['owner']=0.19     # original:  0.163
+#se_appliances['UprightFreezer']['owner']=0.31   # original:  0.291
+
+####################################################################
+
 class Household(object):
     '''
     The Household class is the main class of ProclivityPy, defining the
@@ -90,6 +101,21 @@ class Household(object):
                     obj = Equipment(**set_appliances[app])
                     owner = obj.owner >= random.random()
                     app_n.append(app) if owner else None
+                    
+#            # Cold appliances fix:   ###############################################        
+#            if not ('FridgeFreezer' in app_n) and not ('Refrigerator' in app_n): # if there was none of the two-> add one of the two.
+#                #  Find probability of household to own FF instead of R: (FF ownership over sum of two ownerships-> scale to 0-1 interval)
+#                prob=set_appliances['FridgeFreezer']['owner']/(set_appliances['FridgeFreezer']['owner']+set_appliances['Refrigerator']['owner'])
+#                # if random number is below prob, then the household will own a FF, otherwise a R -> add it
+#                app_n.append('FridgeFreezer') if prob >= random.random()  else app_n.append('Refrigerator') 
+#            
+#            if 'FridgeFreezer' in app_n and 'ChestFreezer' in app_n and 'UprightFreezer' in app_n:  #if there were 3 freezers-> remove a freezer-only
+#                #find probability of household to own CF instead of UF:  (CF ownership over sum of two ownerships-> scale to 0-1 interval)
+#                prob=set_appliances['ChestFreezer']['owner']/(set_appliances['ChestFreezer']['owner']+set_appliances['UprightFreezer']['owner'])
+#                # if random number is below prob, then the household will own a CF, otherwise an UF-> remove the other
+#                app_n.remove('UprightFreezer') if prob >= random.random()  else app_n.remove('ChestFreezer') #remove the one you don't own
+                
+            #########################################################################
             return app_n
 
         def tappings():
@@ -118,12 +144,12 @@ class Household(object):
         self.taps = tappings()
         self.clusters = clusters(self.members)
         # and return
-        print 'Household-object created and parameterized.'
-        print ' - Employment types are %s' % str(self.members)
+        print ('Household-object created and parameterized.')
+        print (' - Employment types are %s' % str(self.members))
         summary = [] #loop dics and remove dubbles
         for member in self.clusters:
             summary += member.values()
-        print ' - Set of clusters is %s' % str(list(set(summary)))
+        print (' - Set of clusters is %s' % str(list(set(summary))))
 
         return None
 
@@ -305,8 +331,8 @@ class Household(object):
         # and print statements
         presence = [to for to in self.occ_m[0] if to < 2]
         hours = len(presence)/6.
-        print ' - Total presence time is {0:.1f} out of {1} hours'.format(hours, self.nday*24)
-        print '\tbeing {:.1f} percent)'.format(hours*100/(self.nday*24))
+        print (' - Total presence time is {0:.1f} out of {1} hours'.format(hours, self.nday*24))
+        print ('\tbeing {:.1f} percent)'.format(hours*100/(self.nday*24)))
         return None
 
     def __plugload__(self):
@@ -363,7 +389,7 @@ class Household(object):
             # output ##########################################################
             # only the power load is returned
             load = int(np.sum(result['P'])/60/1000)
-            print ' - Receptacle load is %s kWh' % str(load)
+            print (' - Receptacle load is %s kWh' % str(load))
 
             return None
 
@@ -441,7 +467,7 @@ class Household(object):
             # output ##########################################################
             # only the power load is returned
             load = int(np.sum(result['P'])/60/1000)
-            print ' - Lighting load is %s kWh' % str(load)
+            print (' - Lighting load is %s kWh' % str(load))
 
             return None
 
@@ -487,7 +513,7 @@ class Household(object):
         # only the power load is returned
         load = np.sum(result['mDHW'])
         loadpppd = int(load/self.nday/len(self.clusters))
-        print ' - Draw-off is %s l/pp.day' % str(loadpppd)
+        print (' - Draw-off is %s l/pp.day' % str(loadpppd))
 
         return None
 
@@ -549,7 +575,7 @@ class Household(object):
                 sh_settings.update({room:shnon})
         # and store
         self.sh_settings = sh_settings
-        print ' - Average comfort setting is %s Celsius' % str(round(np.average(sh_settings['dayzone']),2))
+        print (' - Average comfort setting is %s Celsius' % str(round(np.average(sh_settings['dayzone']),2)))
         return None
 
     def roundUp(self):
