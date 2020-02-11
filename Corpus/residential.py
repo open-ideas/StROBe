@@ -27,10 +27,10 @@ from Data.Appliances import set_appliances
 # Based on 10000 runs, these new values combined with rule-based fix (see in def appliances)
 # lead to the same overall ownership as the original values.
 # We change it here so that the original remain in the Appliances file.
-#tset_appliances['Refrigerator']['owner']=0.27     # original:  0.430
-#set_appliances['FridgeFreezer']['owner']=0.40    # original:  0.651
-#set_appliances['ChestFreezer']['owner']=0.19     # original:  0.163
-#se_appliances['UprightFreezer']['owner']=0.31   # original:  0.291
+set_appliances['Refrigerator']['owner']=0.27     # original:  0.430
+set_appliances['FridgeFreezer']['owner']=0.40    # original:  0.651
+set_appliances['ChestFreezer']['owner']=0.19     # original:  0.163
+set_appliances['UprightFreezer']['owner']=0.31   # original:  0.291
 
 ####################################################################
 
@@ -102,18 +102,18 @@ class Household(object):
                     owner = obj.owner >= random.random()
                     app_n.append(app) if owner else None
                     
-#            # Cold appliances fix:   ###############################################        
-#            if not ('FridgeFreezer' in app_n) and not ('Refrigerator' in app_n): # if there was none of the two-> add one of the two.
-#                #  Find probability of household to own FF instead of R: (FF ownership over sum of two ownerships-> scale to 0-1 interval)
-#                prob=set_appliances['FridgeFreezer']['owner']/(set_appliances['FridgeFreezer']['owner']+set_appliances['Refrigerator']['owner'])
-#                # if random number is below prob, then the household will own a FF, otherwise a R -> add it
-#                app_n.append('FridgeFreezer') if prob >= random.random()  else app_n.append('Refrigerator') 
-#            
-#            if 'FridgeFreezer' in app_n and 'ChestFreezer' in app_n and 'UprightFreezer' in app_n:  #if there were 3 freezers-> remove a freezer-only
-#                #find probability of household to own CF instead of UF:  (CF ownership over sum of two ownerships-> scale to 0-1 interval)
-#                prob=set_appliances['ChestFreezer']['owner']/(set_appliances['ChestFreezer']['owner']+set_appliances['UprightFreezer']['owner'])
-#                # if random number is below prob, then the household will own a CF, otherwise an UF-> remove the other
-#                app_n.remove('UprightFreezer') if prob >= random.random()  else app_n.remove('ChestFreezer') #remove the one you don't own
+            # Cold appliances fix:   ###############################################        
+            if not ('FridgeFreezer' in app_n) and not ('Refrigerator' in app_n): # if there was none of the two-> add one of the two.
+                #  Find probability of household to own FF instead of R: (FF ownership over sum of two ownerships-> scale to 0-1 interval)
+                prob=set_appliances['FridgeFreezer']['owner']/(set_appliances['FridgeFreezer']['owner']+set_appliances['Refrigerator']['owner'])
+                # if random number is below prob, then the household will own a FF, otherwise a R -> add it
+                app_n.append('FridgeFreezer') if prob >= random.random()  else app_n.append('Refrigerator') 
+            
+            if 'FridgeFreezer' in app_n and 'ChestFreezer' in app_n and 'UprightFreezer' in app_n:  #if there were 3 freezers-> remove a freezer-only
+                #find probability of household to own CF instead of UF:  (CF ownership over sum of two ownerships-> scale to 0-1 interval)
+                prob=set_appliances['ChestFreezer']['owner']/(set_appliances['ChestFreezer']['owner']+set_appliances['UprightFreezer']['owner'])
+                # if random number is below prob, then the household will own a CF, otherwise an UF-> remove the other
+                app_n.remove('UprightFreezer') if prob >= random.random()  else app_n.remove('ChestFreezer') #remove the one you don't own
                 
             #########################################################################
             return app_n
