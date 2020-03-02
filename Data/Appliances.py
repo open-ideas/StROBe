@@ -12,7 +12,7 @@ set_appliances = \
     "name": "FridgeFreezer", 
     "consumption": 426.064566552874, 
     "delay": 64, 
-    "cal": 0.0501456635736654, 
+    "cal": 0.025041425747208426, 
     "type": "appliance"
   }, 
   "Hob": {
@@ -27,7 +27,7 @@ set_appliances = \
     "name": "Hob", 
     "consumption": 276.105844135875, 
     "delay": 0, 
-    "cal": 0.03418718911353087, 
+    "cal": 0.03299639168733955, 
     "type": "appliance"
   }, 
   "Clock": {
@@ -57,7 +57,7 @@ set_appliances = \
     "name": "DVD", 
     "consumption": 73.7310058969084, 
     "delay": 0, 
-    "cal": 0.04739091022035889, 
+    "cal": 0.05842846598003611,  
     "type": "appliance"
   }, 
   "Kettle": {
@@ -72,7 +72,7 @@ set_appliances = \
     "name": "Kettle", 
     "consumption": 160.666295473334, 
     "delay": 0, 
-    "cal": 0.004367380955036553, 
+    "cal": 0.004276904478248827, 
     "type": "appliance"
   }, 
   "Microwave": {
@@ -87,7 +87,7 @@ set_appliances = \
     "name": "Microhave", 
     "consumption": 76.5624571821228, 
     "delay": 0, 
-    "cal": 0.007562608679125626, 
+    "cal": 0.007323143485041674,
     "type": "appliance"
   }, 
   "HiFi": {
@@ -102,12 +102,12 @@ set_appliances = \
     "name": "HiFi", 
     "consumption": 88.7977245949857, 
     "delay": 0, 
-    "cal": 0.007025873022230961, 
+    "cal": 0.006832127489455992, 
     "type": "appliance"
   }, 
   "bathFlow": {
     "cycle_length": 10, 
-    "cal": 0.013982, 
+    "cal": 0.013402069713595761, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "shower", 
@@ -127,7 +127,7 @@ set_appliances = \
     "name": "ChestFreezer", 
     "consumption": 271.131996897283, 
     "delay": 72, 
-    "cal": 0.0627277652193313, 
+    "cal": 0.03674017528316244, 
     "type": "appliance"
   }, 
   "Fax": {
@@ -142,7 +142,7 @@ set_appliances = \
     "name": "Fax", 
     "consumption": 29.7428043686541, 
     "delay": 0, 
-    "cal": 0.0005651967107503503, 
+    "cal": 0.0005504547513447778,  
     "type": "appliance"
   }, 
   "Printer": {
@@ -157,7 +157,7 @@ set_appliances = \
     "name": "Printer", 
     "consumption": 49.499661152891, 
     "delay": 0, 
-    "cal": 0.061701753920615075, 
+    "cal": 0.05908618348426443, 
     "type": "appliance"
   }, 
   "WasherDryer": {
@@ -172,7 +172,7 @@ set_appliances = \
     "name": "WasherDryer", 
     "consumption": 520.157476087695, 
     "delay": 0, 
-    "cal": 0.2653079891281336, 
+    "cal": 0.23429065082333161, 
     "type": "appliance"
   }, 
   "CordlessPhone": {
@@ -202,7 +202,7 @@ set_appliances = \
     "name": "PC", 
     "consumption": 348.607972670524, 
     "delay": 0, 
-    "cal": 0.06343689605085034, 
+    "cal": 0.07951344386147721, 
     "type": "appliance"
   }, 
   "UprightFreezer": {
@@ -217,7 +217,7 @@ set_appliances = \
     "name": "UprightFreezer", 
     "consumption": 315.980898639691, 
     "delay": 66, 
-    "cal": 0.0385476720182227, 
+    "cal": 0.014971089773466204, 
     "type": "appliance"
   }, 
   "Vacuum": {
@@ -232,7 +232,7 @@ set_appliances = \
     "name": "Vacuum", 
     "consumption": 73.5783986123575, 
     "delay": 0, 
-    "cal": 0.12245280809715699, 
+    "cal": 0.11741817632461474, 
     "type": "appliance"
   }, 
   "Refrigerator": {
@@ -247,12 +247,12 @@ set_appliances = \
     "name": "Refrigerator", 
     "consumption": 201.820057840835, 
     "delay": 68, 
-    "cal": 0.0313068377395511, 
+    "cal": 0.009491780131412926, 
     "type": "appliance"
   }, 
   "shortFlow": {
     "cycle_length": 1, 
-    "cal": 0.0414424241014, 
+    "cal": 0.040628927969715914, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "Presence", 
@@ -272,7 +272,7 @@ set_appliances = \
     "name": "TV1", 
     "consumption": 241.844438744159, 
     "delay": 0, 
-    "cal": 0.04674453539814623, 
+    "cal": 0.05941989091092896, 
     "type": "appliance"
   }, 
   "MusicPlayer": {
@@ -287,7 +287,7 @@ set_appliances = \
     "name": "MusicPlayer", 
     "consumption": 33.2859171552583, 
     "delay": 0, 
-    "cal": 0.10629164448295642, 
+    "cal": 0.11670271509882882,  
     "type": "appliance"
   }, 
   "TV3": {
@@ -302,7 +302,7 @@ set_appliances = \
     "name": "TV3", 
     "consumption": 243.360717924032, 
     "delay": 0, 
-    "cal": 0.050797564165755496, 
+    "cal": 0.056186747520184266, 
     "type": "appliance"
   }, 
   "TV2": {
@@ -317,12 +317,12 @@ set_appliances = \
     "name": "TV2", 
     "consumption": 241.844438744159, 
     "delay": 0, 
-    "cal": 0.046738578483309756, 
+    "cal": 0.05703940985419692, 
     "type": "appliance"
   }, 
   "mediumFlow": {
     "cycle_length": 1, 
-    "cal": 0.0173775315489, 
+    "cal": 0.01704922364696075, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "Presence", 
@@ -342,7 +342,7 @@ set_appliances = \
     "name": "Iron", 
     "consumption": 17.7297346053873, 
     "delay": 0, 
-    "cal": 0.008929975748216943, 
+    "cal": 0.008756829051606248,
     "type": "appliance"
   }, 
   "TumbleDryer": {
@@ -357,7 +357,7 @@ set_appliances = \
     "name": "TumbleDryer", 
     "consumption": 313.820216429956, 
     "delay": 0, 
-    "cal": 0.44195049791956453, 
+    "cal": 0.43557057690567924, 
     "type": "appliance"
   }, 
   "DishWasher": {
@@ -372,7 +372,7 @@ set_appliances = \
     "name": "DishWasher", 
     "consumption": 273.01616986258, 
     "delay": 0, 
-    "cal": 0.04598240798141638, 
+    "cal": 0.044730370059612695, 
     "type": "appliance"
   }, 
   "TVReceiver": {
@@ -387,12 +387,12 @@ set_appliances = \
     "name": "TVReceiver", 
     "consumption": 152.464284201826, 
     "delay": 0, 
-    "cal": 0.046579971299991266, 
+    "cal": 0.058251742846008335, 
     "type": "appliance"
   }, 
   "showerFlow": {
     "cycle_length": 5, 
-    "cal": 0.0195411875, 
+    "cal": 0.018587480325464478, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "shower", 
@@ -412,7 +412,7 @@ set_appliances = \
     "name": "WashingMachine", 
     "consumption": 191.041292123096, 
     "delay": 0, 
-    "cal": 0.24915644146041727, 
+    "cal": 0.24972454514637987, 
     "type": "appliance"
   }, 
   "Oven": {
@@ -427,7 +427,7 @@ set_appliances = \
     "name": "Hob", 
     "consumption": 236.16014568302, 
     "delay": 0, 
-    "cal": 0.0172271829116994, 
+    "cal": 0.0161784931905714, 
     "type": "appliance"
   }, 
   "AnswerMachine": {
