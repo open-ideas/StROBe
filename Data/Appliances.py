@@ -32,7 +32,7 @@ set_appliances = \
   }, 
   "Clock": {
     "frad": 0.5, 
-    "cycle_power": 0, 
+    "cycle_power": 2, 
     "activity": "None", 
     "standby_power": 2, 
     "owner": 0.9, 
@@ -177,8 +177,8 @@ set_appliances = \
   }, 
   "CordlessPhone": {
     "frad": 0.5, 
-    "cycle_power": 0, 
-    "activity": "Presence", 
+    "cycle_power": 1, 
+    "activity": "None", 
     "standby_power": 1, 
     "owner": 0.9, 
     "cycle_n": 1e-05, 
@@ -432,8 +432,8 @@ set_appliances = \
   }, 
   "AnswerMachine": {
     "frad": 0.5, 
-    "cycle_power": 0, 
-    "activity": "Presence", 
+    "cycle_power": 1, 
+    "activity": "None", 
     "standby_power": 1, 
     "owner": 0.9, 
     "cycle_n": 1e-05, 

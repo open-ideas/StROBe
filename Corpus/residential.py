@@ -11,7 +11,6 @@ import numpy as np
 import time
 import datetime
 import calendar
-import ast
 import os
 import cPickle
 import itertools
@@ -130,24 +129,24 @@ class Household(object):
             Allocate each household member to the correct cluster based on the
             members occupation in time use survey data.
             '''
-            clusters = []
+            clustersList = []
             # loop for every individual in the household
             for ind in members:
                 if ind != 'U12':
                     clu_i = data.get_clusters(ind)
-                    clusters.append(clu_i)
+                    clustersList.append(clu_i)
             # and return the list of clusters
-            return clusters
+            return clustersList
         # and run all
         self.members = members(**kwargs)
         self.apps = appliances()
         self.taps = tappings()
-        self.clusters = clusters(self.members)
+        self.clustersList = clusters(self.members)
         # and return
         print ('Household-object created and parameterized.')
         print (' - Employment types are %s' % str(self.members))
         summary = [] #loop dics and remove dubbles
-        for member in self.clusters:
+        for member in self.clustersList:
             summary += member.values()
         print (' - Set of clusters is %s' % str(list(set(summary))))
 
@@ -299,7 +298,7 @@ class Household(object):
         # by which we can create a typical week.
         cdir = os.getcwd()
         occ_week = []
-        for member in self.clusters:
+        for member in self.clustersList:
             startstate = 2 #4.00 AM
             wkdy = dayrun(startstate, member['wkdy'])
             sat = dayrun(wkdy[-1], member['sat'])
@@ -358,18 +357,12 @@ class Household(object):
             nday = self.nday
             dow = self.dow
             result_n = dict()
-            counter = range(len(self.clusters))
             for app in self.apps:
                 # create the equipment object with data from dataset.py
                 eq = Equipment(**set_appliances[app])
-                r_app = dict()
-                n_app = 0
-                # loop for all household mmembers
-                for i in counter:
-                    r_appi, n_appi = eq.simulate(nday, dow, self.clusters[i], self.occ[i])
-                    r_app = stats.sum_dict(r_app, r_appi)
-                    n_app += n_appi
-                # and sum
+                # simulate what the load will be
+                r_app, n_app = eq.simulate(nday, dow, self.clustersList, self.occ)
+                # and add to total load
                 result_n.update({app:n_app})
                 power += r_app['P']
                 radi += r_app['QRad']
@@ -487,15 +480,16 @@ class Household(object):
         # determine all transitions of the appliances depending on the appliance
         # basic properties, ie. stochastic versus cycling power profile
         flow = np.zeros(nmin+1)
-        clusterDict = self.clusters[0]
+        cluster= [self.clustersList[0]] # use only clusterDict from 1st occupant (still a list since in [])
         nday = self.nday
         dow = self.dow
-        occ_m = self.occ_m[0]
+        occ_m = self.occ_m[0] # use merged occupancy -> simulate once
         result_n = dict()
         for tap in self.taps:
             # create the equipment object with data from dataset.py
             eq = Equipment(**set_appliances[tap])
-            r_tap, n_tap = eq.simulate(nday, dow, clusterDict, occ_m)
+            # simulate the DHW demand
+            r_tap, n_tap = eq.simulate(nday, dow, cluster, occ_m)
             result_n.update({tap:n_tap})
             flow += r_tap['mDHW']
         # a new time axis for power output is to be created as a different
@@ -512,7 +506,7 @@ class Household(object):
         # output ##########################################################
         # only the power load is returned
         load = np.sum(result['mDHW'])
-        loadpppd = int(load/self.nday/len(self.clusters))
+        loadpppd = int(load/self.nday/len(self.clustersList))
         print (' - Draw-off is %s l/pp.day' % str(loadpppd))
 
         return None
@@ -634,9 +628,9 @@ class Equipment(object):
         for (key, value) in kwargs.items():
             setattr(self, key, value)
 
-    def simulate(self, nday, dow, cluster, occ):
+    def simulate(self, nday, dow, clustersList, occ):
 
-        def stochastic_flow(self, nday, dow, clusterDict, occ):
+        def stochastic_flow(self, nday, dow, clusterList, occ):
             '''
             Simulate non-cycling appliances based on occupancy and the model
             and Markov state-space of Richardson et al.
@@ -644,6 +638,7 @@ class Equipment(object):
             # parameters ######################################################
             # First we check the required activity and load the respective
             # stats.DTMC file with its data.
+            clusterDict=clusterList[0] # take Dictionary in first element of list
             len_cycle = self.cycle_length
             act = self.activity
             if self.activity not in ('None','Presence'):
@@ -689,59 +684,81 @@ class Equipment(object):
 
             return r_fl, n_fl
 
-        def stochastic_load(self, nday, dow, clusterDict, occ):
+        def stochastic_load(self, nday, dow, clustersList, occ):
             '''
             Simulate non-cycling appliances based on occupancy and the model
             and Markov state-space of Richardson et al.
             '''
-
             # parameters ######################################################
-            # First we check the required activity and load the respective
-            # stats.DTMC file with its data.
-            len_cycle = self.cycle_length
-            act = self.activity
-            if self.activity not in ('None','Presence'):
-                actdata = stats.DTMC(clusterDict=clusterDict)
-            else:
-                actdata = None
+
+            len_cycle = self.cycle_length # cycle length for this appliance
+            act = self.activity  # activity linked to the use of this appliance
+            numOcc=len(clustersList) # number of differenc active occupants >12y
 
             # script ##########################################################
             # a yearly simulation is basic, also in a unittest
-            nbin = 144
-            minutes = nday * 1440
-            to = -1 # time counter for occupancy
-            tl = -1 # time counter for load
-            left = -1 # time counter for appliance duration
-            n_eq = 0
+            nbin = 144 # steps in occupancy data per day (10min steps)
+            minutes = nday * nbin * 10
+            n_eq_dur = 0 # number of minutes that the appliance is used
             P = np.zeros(minutes+1)
             Q = np.zeros(minutes+1)
-            for doy, step in itertools.product(range(nday), range(nbin)):
-                dow_i = dow[doy]
+            
+  
+            
+            # prefill probabilities for each occupant to perform the activity linked to appliance for entire year          
+            # make occupancy vector per time step (10-min): if ANY occupant is active (state=1), make aggregate occy=1
+            occy =[[1 if occ[i][x] == 1 else 0 for x in range(nday*nbin)] for i in range(numOcc)] # size numOcc x timesteps in year            
+            if act == 'None': # if appliance is linked  to no specific activity (e.g. fridge)
+                prob = [[1 for x in range(nday*nbin)] for i in range(numOcc)] # activity 'None' always probability=1 
+            elif act == 'Presence': # if appliance linked to presence (active occupants): probability =1 when ANYONE is present
+                prob = occy
+            else: # appliance linked to specific activity (e.g. "food")  
+                # get activity probabilities for all occupants from stats.DTMC file
+                actdata= [stats.DTMC(clusterDict=clustersList[i]) for i in range(numOcc)] 
+                prob = occy   # just initiate correct size    
+                to = -1 # time counter for occupancy
+                for doy, step in itertools.product(range(nday), range(nbin)): #loop over year
+                    dow_i = dow[doy]
+                    to += 1
+                    for i in range(numOcc):
+                        prob[i][to] = occy[i][to] * actdata[i].get_var(dow_i, act, step)
+
+            ######################### SIMULATE appliance use
+            to = -1 # time counter for occupancy (10min)
+            tl = -1 # time counter for load (1min)
+            left = [-1 for i in range(numOcc)] # time counter for appliance duration per occupant -> start as not used: -1
+            
+            for doy, step in itertools.product(range(nday), range(nbin)): # loop over 10min steps in year
+                dow_i = dow[doy] # day of week
                 to += 1
+                # occupancy in 10 min, but for each occupancy step simulate 10 individual minutes for the loads.
                 for run in range(10):
                     tl += 1
-                    # check if this appliance is already on
-                    if left <= 0:
-                        # determine possibilities
-                        if self.activity == 'None':
-                            prob = 1
-                        elif self.activity == 'Presence':
-                            prob = 1 if occ[to] == 1 else 0
-                        else:
-                            occs = 1 if occ[to] == 1 else 0
-                            prob = occs * actdata.get_var(dow_i, act, step)
-                        # check if there is a statechange in the appliance
-                        if random.random() < prob * self.cal:
-                            n_eq += 1
-                            left = random.gauss(len_cycle, len_cycle/10)
-                        P[tl] += self.standby_power
-                    else:
-                        left += -1
-                        P[tl] += self.cycle_power
+                    if any(l > 0 for l in left): # if any occupant was using the appliance (there was time left[i]>0)
+                        P[tl] += self.cycle_power  # assign power used when appliance is working
+                        n_eq_dur += 1 # add to counter for number of minutes used in year
+                    else: # if nobody was using it
+                        P[tl] += self.standby_power # assign stand-by power
+                        
+                    # per occupant, check if they will want to change the state of the appliance
+                    for i in range(numOcc): 
+                        # check if this appliance is being used by occupant i: time left[i]>0
+                        if left[i] > 0:
+                            left[i] += -1   # count time down until cycle passed (for this occupant)          
+                        else: # if it was not used by this occupant: left[i] <= 0 
+                            # check if there is a state change in the appliance for this occupant
+                            if random.random() < prob[i][to] * self.cal: # if random number below calibration factor cal* probability of activity: start appliance
+                                left[i] = random.gauss(len_cycle, len_cycle/10) # start a cycle of random  duration for this occupant
 
+                            
             r_eq = {'time':time, 'occ':None, 'P':P, 'Q':Q, 'QRad':P*self.frad,
                       'QCon':P*self.fconv, 'Wknds':None, 'mDHW':None}
-
+            
+           # n_eq is used in calibration process for value of 'cal'
+            if len_cycle != 0: 
+                n_eq=n_eq_dur/len_cycle # approximate number of cycles/year (assuming average length: mean of gauss distribution)                
+            else:
+                 n_eq=1e-05 # some appliances don't have number of cycles if they are continuously working (then n_eq is not used)
             return r_eq, n_eq
 
         def cycle_load(self, nday):
@@ -763,7 +780,6 @@ class Equipment(object):
             # start as OFF (assumption)
             on=False #is it ON? 
             left = random.gauss(delay/2, delay/4) # time left until change of state (initiate random)
-
                        
             for tl in range(nbin+1): # loop over every minute of the year
                 # if there is time LEFT until change of state, remain as is
@@ -788,13 +804,23 @@ class Equipment(object):
 
             return r_eq, n_eq
 
-        if self.type == 'appliance':
-            #check if the equipment is an appliance instead of tapping point
-            if self.delay == 0:
-                r_app, n_app = stochastic_load(self, nday, dow, cluster, occ)
-            else:
-                r_app, n_app = cycle_load(self, nday)
-        else:
-            r_app, n_app = stochastic_flow(self, nday, dow, cluster, occ)
+        # when simulating an equipment object, choose which of following happens:             
+        if self.type == 'appliance': #check if the equipment is an appliance instead of tapping point        
+            if self.activity == 'None': #cycling loads -> don't depend on occupants
+                r_app, n_app = cycle_load(self, nday) 
+            elif self.name in ('placeholder'): # For future: if each occupant has her/his own appliance
+                # For the moment appliances are assigned to the household such that there is one of each type 
+                # -> no way many people use their own (That's why there are 3 different TVs)
+                r_app = dict()
+                n_app = 0
+                for i in range(len(clustersList)): # loop active occupants >12y
+                    r_appi, n_appi = stochastic_load(self, nday, dow, [clustersList[i]], [occ[i]])# we pass a list with one clusterDict
+                    r_app = stats.sum_dict(r_app, r_appi)
+                    n_app += n_appi                
+            else: # other appliances (shared)               
+                r_app, n_app = stochastic_load(self, nday, dow, clustersList, occ)# we pass a list with all available clusterDicts, as given from plugloads
+        else: # flow-> model is based on total presence: do only once.
+            r_app, n_app = stochastic_flow(self, nday, dow, clustersList, occ) # we pass a list with one clusterDict, as given from DHW model
+
 
         return r_app, n_app
