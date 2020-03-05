@@ -5,6 +5,8 @@ Created on Wed Oct 09 15:36:23 2013
 @author: Ruben Baetens
 
 Reviewed and automated  Oct 2017, Christina Protopapadaki
+
+Updated in March 2020 to include flow calibration, Christina Protopapadaki
 """
 
 import os
@@ -26,8 +28,8 @@ appliances = ['MusicPlayer','HiFi','Iron','Vacuum','Fax','PC','Printer','TV1','T
 apps_noVal=['AnswerMachine','Clock','CordlessPhone'] # These appliances work constantly: infinate cycles, no calibration needed       
 flows=['shortFlow','mediumFlow','showerFlow','bathFlow']
 
-N=100 amount of simulated households for calibration 
-rep=10 amount of repeated calibration rounds to check convergence
+N=100  # amount of simulated households for calibration 
+rep=10  # amount of repeated calibration rounds to check convergence
 conv=defaultdict(list) #dictionary to save convergence factors per repetition 
 
 for j in range(rep):
@@ -35,16 +37,7 @@ for j in range(rep):
     ## Simulate N test households
 #    if not os.path.exists(cwd + '\\Calibration'):
 #        os.makedirs(cwd + '\\Calibration') # make folder to save test households for validation (if needed)
-    for i in range(N):
-        if i in range(0,N,10) : print 'Test house '+str(i) + ' created'
-        test = residential.Household('Test_'+str(i))
-        test.simulate()
-        test.roundUp()
-        # to save time & space, don't save individual simulation results       
-#        os.chdir(cwd + '\\Calibration')
-#        test.pickle()
-#        os.chdir(cwd)
-    
+   
     n = dict()
     # initiate with zeros
     for app in appliances:
@@ -58,9 +51,19 @@ for j in range(rep):
     n.update({'Eload':0}) # annual electricity load in kWh
     n.update({'QCon':0}) # annual convective internal heat gains in kWh
     
-    # fill dictionary with data from calibration simulations
     for i in range(N):
-        if i in range(0,N,10) : print 'Test house '+str(i) + ' being processed'
+        if i in range(0,N,10) : print 'Test house '+str(i) + ' created'
+        test = residential.Household('Test_'+str(i))
+        test.simulate()
+        test.roundUp()
+###########  to save time & space, don't save individual simulation results       
+#        os.chdir(cwd + '\\Calibration')
+#        test.pickle()
+#        os.chdir(cwd)
+
+    # fill dictionary with data from calibration simulations
+#    for i in range(N):
+#        if i in range(0,N,10) : print 'Test house '+str(i) + ' being processed'
 #        test = cPickle.load(open('Calibration\\Test_'+str(i)+'.p','rb'))
         n.update({'Eload':n['Eload']+ int(np.sum(test.P)/60/1000)}) # annual electricity load in kWh
         n.update({'QCon':n['QCon']+ int(np.sum(test.QCon)/60/1000)}) # annual convective internal heat gains in kWh
