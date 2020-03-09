@@ -11,7 +11,7 @@ set_appliances = \
     "cycle_length": 22, 
     "name": "FridgeFreezer", 
     "consumption": 426.064566552874, 
-    "delay": 44, 
+    "delay": 64, 
     "cal": 0.0501456635736654, 
     "type": "appliance"
   }, 
@@ -126,7 +126,7 @@ set_appliances = \
     "cycle_length": 14, 
     "name": "ChestFreezer", 
     "consumption": 271.131996897283, 
-    "delay": 56, 
+    "delay": 72, 
     "cal": 0.0627277652193313, 
     "type": "appliance"
   }, 
@@ -216,7 +216,7 @@ set_appliances = \
     "cycle_length": 20, 
     "name": "UprightFreezer", 
     "consumption": 315.980898639691, 
-    "delay": 40, 
+    "delay": 66, 
     "cal": 0.0385476720182227, 
     "type": "appliance"
   }, 
@@ -246,7 +246,7 @@ set_appliances = \
     "cycle_length": 18, 
     "name": "Refrigerator", 
     "consumption": 201.820057840835, 
-    "delay": 36, 
+    "delay": 68, 
     "cal": 0.0313068377395511, 
     "type": "appliance"
   }, 

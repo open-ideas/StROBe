@@ -758,11 +758,12 @@ class Equipment(object):
             # define length of cycles (same for entire year, assumed to depend on appliance)
             len_cycle=random.gauss(self.cycle_length, self.cycle_length/10)
             # define duration of break between cycles (same for entire year)
-            delay=random.gauss(self.delay, self.delay/4)
+            delay=random.gauss(self.delay, self.delay/10)
             
             # start as OFF (assumption)
             on=False #is it ON? 
-            left = delay # time left until change of state
+            left = random.gauss(delay/2, delay/4) # time left until change of state (initiate random)
+
                        
             for tl in range(nbin+1): # loop over every minute of the year
                 # if there is time LEFT until change of state, remain as is
