@@ -16,7 +16,7 @@ family.parameterize()
 family.simulate()
 
 # Test feeder
-fee.IDEAS_Feeder('Example', 5, strobeDir)
+fee.IDEAS_Feeder('Example', 5, strobeDir, sh_K=True)
 
 # cleanup
 if cleanup:

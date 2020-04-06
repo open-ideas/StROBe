@@ -15,13 +15,14 @@ class IDEAS_Feeder(object):
     The Community class defines a set of hosueholds.
     '''
     
-    def __init__(self, name, nBui, path):
+    def __init__(self, name, nBui, path, sh_K=True):
         '''
         Create the community based on number of households and simulate for
         output towards IDEAS model.
         '''
         self.name = name
         self.nBui = nBui
+        self.sh_K = sh_K #defines whether space heating set-point temperature will be written in K (otherwise deg Celsius)
         # we create, simulate and pickle all 'nBui' buildings
         self.simulate(path)
         # then we loop through all variables and output as single file
@@ -64,6 +65,8 @@ class IDEAS_Feeder(object):
             hou = cPickle.load(open(str(self.name)+'_'+str(i)+'.p','rb'))
             for variable in variables:       
                 var = eval('hou.'+variable)
+                if variable in ['sh_day','sh_bath','sh_night'] and self.sh_K:
+                    var=var+273.15 # make it in Kelvin
                 if len(dat[variable]) != 0:
                     dat[variable] = np.vstack((dat[variable],var))
                 else:
