@@ -463,9 +463,65 @@ class Household(object):
             print (' - Lighting load is %s kWh' % str(load))
 
             return None
+        
+        def MetabolicHeat(self):
+            '''
+            Simulation of the metabolic heat gains.
+            '''
+
+            # it is assumed that 50% of the produced heat is radiative 
+            # and 50% is convective
+            fRad = 0.5
+            fCon = 0.5
+            counter = range(len(self.clusters))
+            nday = self.nday
+            nbin = 144
+            nmin = self.nday * 1440
+            rad = np.zeros(nmin+1)
+            con = np.zeros(nmin+1)
+            for i in counter:
+                to = -1 # time counter for occupancy
+                tl = -1 # time counter for minutes
+                # the heat a person produces is dependent on the metabolism
+                met_sl = random.gauss(0.8,0.05) # metabolism when sleeping
+                met_act = random.gauss(2,0.1) # metabolism when active
+                x = [0.8, 1.25]
+                f = [70,110]
+                sleep =  np.interp(met_sl, x, f)
+                active = np.interp(met_act, x, f)
+                Met = np.zeros(nmin+1)
+                for doy, step in itertools.product(range(nday), range(nbin)):
+                    to += 1
+                    for run in range(0, 10):
+                        tl += 1
+                        if self.occ[i][to]==1:
+                            Met[tl] = active
+                        elif self.occ[i][to]==2:
+                            Met[tl] = sleep
+                # and sum
+                rad += fRad*Met
+                con += fCon*Met
+                
+            # a new time axis for power output is to be created as a different
+            # time step is used in comparison to occupancy
+            time = 4*60*60 + np.arange(0, (nmin+1)*60, 60)
+
+            result = {'time':time, 'occ':None, 'P':None, 'Q':None,
+                      'QRad':rad, 'QCon':con, 'Wknds':None, 'mDHW':None}
+
+            self.r_MetabolicHeat = result
+            
+            # output ##########################################################
+            # the total heat gains of the persons are returned
+            HeatG = int((np.sum(result['QCon'])/60/1000)+(np.sum(result['QRad'])/60/1000))
+            print (' - Total metabolic heat gains are %s kWh' % str(HeatG))
+                
+
+            return None
 
         receptacles(self)
         lightingload(self)
+        MetabolicHeat(self)
 
         return None
 
@@ -584,8 +640,8 @@ class Household(object):
         self.sh_bath = self.sh_settings['bathroom']
         self.P = self.r_receptacles['P'] + self.r_lighting['P']
         self.Q = self.r_receptacles['Q'] + self.r_lighting['Q']
-        self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad']
-        self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon']
+        self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad'] + self.r_MetabolicHeat['QRad']
+        self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon'] + self.r_MetabolicHeat['QCon']
         self.mDHW = self.r_flows['mDHW']
 
         #######################################################################        
