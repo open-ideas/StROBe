@@ -3,24 +3,30 @@ import os
 import Corpus.feeder as fee
 import Corpus.residential as res
 
-strobeDir = os.path.dirname(os.path.realpath(__file__))
-cleanup = True
+strobeDir = os.path.dirname(os.path.realpath(__file__)) # get path where this file is (StROBe path)
+os.chdir(strobeDir + '\\Corpus\\') #make Corpus the current directory
 
-os.chdir(strobeDir + '\\Corpus\\')
+# Create and simulate a single household, with given type of members, and given year
+family = res.Household("Example household", members=['FTE', 'Unemployed'])
+family.simulate(year=2013, ndays=365)
 
-os.chdir(strobeDir + "\\Data\\")
+family.__dict__ # list all elements of family for inspection
 
-# Test Household.parametrize() and .simulate()
-family = res.Household("Example family")
-family.parameterize()
-family.simulate()
 
-# Test feeder
-fee.IDEAS_Feeder('Example', 5, strobeDir, sh_K=True)
+# Simulate households for an entire feeder
 
-# cleanup
+cleanup = True #choose whether individual household results will be deleted or not
+# create folder where simulations will be stored for feeder
+dataDir = os.path.join(strobeDir,"Simulations")
+if not os.path.exists(dataDir):
+    os.mkdir(dataDir)
+    
+# Test feeder with 5 households, temperatures given in Kelvin
+fee.IDEAS_Feeder(name='Household',nBui=5, path=dataDir, sh_K=True)
+
+# cleanup pickled household files from new folder (only keep text files with results)
 if cleanup:
-    for file in os.listdir(strobeDir):
+    for file in os.listdir(dataDir):
         print file
-        if file.endswith(('.p', '.txt')):
-            os.remove(os.path.join(strobeDir, file))
+        if file.endswith(('.p')):
+            os.remove(os.path.join(dataDir, file))
