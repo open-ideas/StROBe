@@ -12,7 +12,6 @@ Updated in March 2020 to include flow calibration, Christina Protopapadaki
 import os
 import numpy as np
 import json
-import cPickle
 import residential
 from Data.Appliances import set_appliances
 from collections import defaultdict
@@ -55,7 +54,6 @@ for j in range(rep):
         if i in range(0,N,10) : print 'Test house '+str(i) + ' created'
         test = residential.Household('Test_'+str(i))
         test.simulate()
-        test.roundUp()
 ###########  to save time & space, don't save individual simulation results       
 #        os.chdir(cwd + '\\Calibration')
 #        test.pickle()
@@ -140,3 +138,4 @@ for k in conv:
 plt.legend(loc='lower right');
 plt.gca().grid()
 plt.show()
+
