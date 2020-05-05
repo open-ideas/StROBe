@@ -51,22 +51,22 @@ def get_occDict(cluster, **kwargs):
     # create an empty dictionary
     occDict = dict()
     ##########################################################################
-    # first we load the occupancy start states 'oss' from StartStates.txt
+    # first we load the occupancy start states 'ss' from StartStates.txt
     ss = dict()
     data = np.loadtxt('StartStates.txt', float)
     for i in range(len(data)):
         ss.update({str(i+1):data[i]})
-    # and add the 'oss' data to the occupancy dictionary
+    # and add the 'ss' data to the occupancy dictionary
     occDict.update({'ss':ss})
     ##########################################################################
-    # Second we load the occupancy transitions state probabilities 'osn'
+    # Second we load the occupancy transitions state probabilities 'os'
     # from TransitionProbability.txt
     data = np.loadtxt('TransitionProbability.txt', float)
     for i in range(3):
         os_i = dict()
         for j in range(48):
             os_i.update({str(j+1):data[i*48+j]})
-        # and add the 'osn_i' data to the occupancy dictionary
+        # and add the 'os_i' data to the occupancy dictionary
         occDict.update({'os_'+str(i+1):os_i})
     ##########################################################################
     # Third we load the Markov time density 'ol' from DurationProbability.txt
@@ -99,7 +99,7 @@ def get_actDict(cluster, **kwargs):
     act = {0:'pc', 1:'food', 2:'vacuum', 3:'iron', 4:'tv', 5:'audio',
            6:'dishes', 7:'washing', 8:'drying', 9:'shower'}
     ##########################################################################
-    # Second we load the activity proclivity functions 'agn'
+    # Second we load the activity proclivity functions
     # from Patter*cluster*.txt
     FILNAM = 'Pattern'+str(cluster)+'.txt'
     data = np.loadtxt(FILNAM, float)
