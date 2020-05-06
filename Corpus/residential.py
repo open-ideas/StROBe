@@ -145,7 +145,7 @@ class Household(object):
         # and return
         print ('Household-object created and parameterized.')
         print (' - Employment types are %s' % str(self.members))
-        summary = [] #loop dics and remove dubbles
+        summary = [] #loop dics and remove doubles
         for member in self.clustersList:
             summary += member.values()
         print (' - Set of clusters is %s' % str(list(set(summary))))
@@ -394,6 +394,9 @@ class Household(object):
             '''
             Simulate use of lighting for residential buildings based on the
             model of J. Widén et al (2009)
+            The model computes an ideal power level pow_id depending on the irradiance level 
+            and occupancy (but not on light switching behavior of occupants itself). 
+            The power is then adjusted in steps, assuming occupants will not react smoothly to irradiation changes.
             '''
 
             # parameters ######################################################
@@ -416,52 +419,45 @@ class Household(object):
             nbin = 144 # steps in occupancy data per day (10min steps)
             minutes = self.nday * 24 * 60
             occ_m = self.occ_m[0]
-            # the model is found on an ideal power level power_id depending on
-            # irradiance level and occupancy (but not on light switching
-            # behavior of occupants itself)
             to = -1 # time counter for occupancy
             tl = -1 # time counter for minutes in lighting load
-            power_max = 200
-            irr_max = 200
-            pow_id = np.zeros(minutes+1)
-            prob_adj = 0.1 # hourly probability to adjust
-            pow_adj = 40 # power by which is adjusted
+            power_max = 200 # lighting power used when there is 0 irradiance (maximum)
+            irr_max = 200 # irradiance threshhold above which no lighting is used
+            pow_id = np.zeros(minutes+1) # initialize zero ideal lighing load
+            prob_adj = 0.1 # probability to adjust lighting
+            pow_adj = 40 # step by which power is adjusted
             P = np.zeros(minutes+1)
             Q = np.zeros(minutes+1)
-            for doy, step in itertools.product(range(nday), range(nbin)):
+            for doy, step in itertools.product(range(nday), range(nbin)): #loop over simulation period, per 10min steps
                 to += 1
-                for run in range(0, 10):
+                for run in range(0, 10): #for each minute in the step
                     tl += 1
-                    if occ_m[to] > int(1) or (irr[tl] >= irr_max):
-                        pow_id[tl] = 0
+                    if occ_m[to] > int(1) or (irr[tl] >= irr_max): #if occupants not active (occ_m>1) OR irradiance more than threshhold
+                        pow_id[tl] = 0 # lights will be off
                     else:
-                        pow_id[tl] = power_max*(1 - irr[tl]/irr_max)
-                    # determine all transitions of appliances depending on
-                    # the appliance basic properties, ie. stochastic versus
-                    # cycling power profile
-                    if occ_m[to] > int(1):
+                        pow_id[tl] = power_max*(1 - irr[tl]/irr_max) # lights ON, power depends on level of irradiance compared to irr_max
+                  
+                    # determine final power usage after stepwise adjustments
+                    if occ_m[to] > int(1): # if OFF, it stays that way
                         P[tl] = pow_id[tl]
-                    elif random.random() <= prob_adj:
-                        delta = P[tl-1] - pow_id[tl]
-                        delta_min = np.abs(delta - pow_adj)
-                        delta_plus = np.abs(delta + pow_adj)
-                        if delta > 0 and delta_min < np.abs(delta) :
-                            P[tl] = P[tl-1]-pow_adj
-                        elif delta < 0 and delta_plus < np.abs(delta):
-                            P[tl] = P[tl-1]+pow_adj
-                        else:
+                    elif random.random() <= prob_adj: # if ON, check if adjustment happens (random number< prob_adj)
+                        delta = P[tl-1] - pow_id[tl] # difference between previous step and "ideal" current step 
+                        if delta > 0 and pow_adj/2 < np.abs(delta) : # if absolute difference is larger than half of the adjustment step
+                            P[tl] = P[tl-1]-pow_adj  # the new power is the previous one, decreased by the adjustment step
+                        elif delta < 0 and pow_adj/2 < np.abs(delta):
+                            P[tl] = P[tl-1]+pow_adj  # the new power is the previous one, increased by the adjustment step
+                        else: #otherwise, keep previous level
                             P[tl] = P[tl-1]
-                    else:
+                    else: #otherwise, keep previous level
                         P[tl] = P[tl-1]
 
-            radi = P*0.55
-            conv = P*0.45
+            radi = P*0.55 # fixed radiative part 55% for heat dissipation
+            conv = P*0.45 # fixed convective part 45% for heat dissipation
 
             result = {'P':P, 'Q':Q, 'QRad':radi, 'QCon':conv}
 
             self.r_lighting = result
-            # output ##########################################################
-            # only the power load is returned
+
             load = int(np.sum(result['P'])/60/1000)
             print (' - Lighting load is %s kWh' % str(load))
             
@@ -480,13 +476,10 @@ class Household(object):
     def __dhwload__(self):
         '''
         Simulate use of domestic hot water based on Jordan & Vajen (2001) and
-        J.Widen (2009).
+        and the Markov state-space model of Richardson et al.
         '''
-
         # define number of minutes
         nmin = self.nday * 24 * 60
-        # determine all transitions of the appliances depending on the appliance
-        # basic properties, ie. stochastic versus cycling power profile
         flow = np.zeros(nmin+1)
         cluster= [self.clustersList[0]] # use only clusterDict from 1st occupant (still a list since in [])
         nday = self.nday
@@ -494,13 +487,13 @@ class Household(object):
         occ_m = self.occ_m[0] # use merged occupancy -> simulate once
         result_n = dict()
         for tap in self.taps:
-            # create the equipment object with data from Appliances.py
+            # create the tapping object with data from Appliances.py
             eq = Equipment(**set_appliances[tap])
             # simulate the DHW demand
             r_tap, n_tap = eq.simulate(nday, dow, cluster, occ_m)
             result_n.update({tap:n_tap})
             flow += r_tap['mDHW']
-        # a new time axis for power output is to be created 
+        # a new time axis for power output is created 
         # since a different time step is used in comparison to occupancy
         time = 4*60*60 + np.arange(0, (nmin+1)*60, 60) # in seconds, starts at 4 AM
 
@@ -646,8 +639,8 @@ class Equipment(object):
 
         def stochastic_flow(self, nday, dow, clusterList, occ):
             '''
-            Simulate hot water tappings based on occupancy and the model
-            and Markov state-space of Richardson et al.
+            Simulate hot water tappings based on occupancy and the 
+            Markov state-space model of Richardson et al.
             Tapping characteristics are taken from Jordan & Vajen (2001). 
             "Realistic Domestic Hot-water Profiles in Different Time Scales"
             '''
@@ -701,8 +694,8 @@ class Equipment(object):
 
         def stochastic_load(self, nday, dow, clustersList, occ):
             '''
-            Simulate non-cycling appliances based on occupancy and the model
-            and Markov state-space of Richardson et al.
+            Simulate non-cycling appliances based on occupancy and the 
+            Markov state-space model of Richardson et al.
             '''
             # parameters ######################################################
 
