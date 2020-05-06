@@ -1,6 +1,6 @@
 import os
 
-import Corpus.feeder as fee
+import Corpus.feeder as feeder
 import Corpus.residential as res
 
 strobeDir = os.path.dirname(os.path.realpath(__file__)) # get path where this file is (StROBe path)
@@ -14,19 +14,14 @@ family.__dict__ # list all elements of family for inspection
 
 
 # Simulate households for an entire feeder
-
-cleanup = True #choose whether individual household results will be deleted or not
 # create folder where simulations will be stored for feeder
 dataDir = os.path.join(strobeDir,"Simulations")
 if not os.path.exists(dataDir):
     os.mkdir(dataDir)
     
-# Test feeder with 5 households, temperatures given in Kelvin
-fee.IDEAS_Feeder(name='Household',nBui=5, path=dataDir, sh_K=True)
+# Test feeder with 5 households, temperatures given in Kelvin, and do not save individual household result files
+fee=feeder.IDEAS_Feeder(name='Neighborhood',nBui=5, path=dataDir, sh_K=True, save_indiv=False)
+fee.simulate()
+fee.output()
 
-# cleanup pickled household files from new folder (only keep text files with results)
-if cleanup:
-    for file in os.listdir(dataDir):
-        print file
-        if file.endswith(('.p')):
-            os.remove(os.path.join(dataDir, file))
+fee.__dict__ # list all elements of fee for inspection
