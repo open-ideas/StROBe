@@ -15,10 +15,25 @@ Currently in beta.
 ## Examples
 
 In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you can find simple examples for:  
-- simulation of individual households using `class Household()` from [Corpus/residential.py](https://github.com/open-ideas/StROBe/blob/master/Corpus/residential.py), and 
-- simulation of sets of households as inputs for **IDEAS** using `class IDEAS_Feeder()` from [Corpus/feeder.py](https://github.com/open-ideas/StROBe/blob/master/Corpus/feeder.py).
+- simulation of individual households using `class Household()` from [`Corpus/residential.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/residential.py), and 
+- simulation of sets of households as inputs for **IDEAS** using `class IDEAS_Feeder()` from [`Corpus/feeder.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/feeder.py).
 
 ## Revision history
+
+**May 8, 2020**
+(See [pull request](https://github.com/open-ideas/StROBe/pull/31) for details.)
+
+- Added in-line comments throughout the code, mainly in [`Corpus/residential.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/residential.py).
+
+**May 8, 2020**
+(See [pull request](https://github.com/open-ideas/StROBe/pull/30) for details.)
+
+- Added the 4h shift to the occupancy results `occ` and `occ_m` and included the function `Household.roundUp()`, used to perform this shift, in the execution of `Household.simulate()`, to guarantee the correct time shifting also when someone simulates independent households.
+
+**May 8, 2020**
+(See [pull request](https://github.com/open-ideas/StROBe/pull/29) for details.)
+
+- Added revision history and references and updated dependencies in [`README.md`](https://github.com/open-ideas/StROBe/blob/master/README.md), and updated [`example.py`](https://github.com/open-ideas/StROBe/blob/master/example.py).
 
 **Apr 27, 2020**
 (See [pull request](https://github.com/open-ideas/StROBe/pull/28) for details.)
@@ -57,7 +72,7 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 **Jun 15, 2018**
 (See [pull request](https://github.com/open-ideas/StROBe/pull/14) for details.)
 
-- Added a minimal working example to simulate a single household and a group of buildings (feeder). See [`example.py`](https://github.com/open-ideas/StROBe/blob/master/example.py)
+- Added a minimal working example to simulate a single household and a group of buildings (feeder). See [`example.py`](https://github.com/open-ideas/StROBe/blob/master/example.py).
 
 
 **Jul 3, 2018**
