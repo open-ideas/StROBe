@@ -12,7 +12,7 @@ import os
 
 class IDEAS_Feeder(object):
     '''
-    The Community class defines a set of hosueholds.
+    The Community class defines a set of households.
     '''
     
     def __init__(self, name, nBui, path, sh_K=True):
@@ -45,7 +45,6 @@ class IDEAS_Feeder(object):
         for i in range(self.nBui):
             hou = residential.Household(str(self.name)+'_'+str(i))
             hou.simulate()
-            hou.roundUp()
             os.chdir(path)
             hou.pickle()
             os.chdir(cwd)

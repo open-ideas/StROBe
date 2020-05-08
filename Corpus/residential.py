@@ -164,6 +164,7 @@ class Household(object):
         self.__plugload__()
         self.__dhwload__()
         self.__shsetting__()
+        self.roundUp()
 
     def __chronology__(self, year, ndays=None):
         '''
@@ -587,9 +588,13 @@ class Household(object):
         self.QRad = self.r_receptacles['QRad'] + self.r_lighting['QRad']
         self.QCon = self.r_receptacles['QCon'] + self.r_lighting['QCon']
         self.mDHW = self.r_flows['mDHW']
-
+        self.dow = self.dow[0] # only first day of year is interensting to keep (Monday = 0)
+        
         #######################################################################        
         # bring last 4 h to the front so that data starts at midnight
+        self.occ_m = np.roll(self.occ_m,24)
+        self.occ=[np.roll(i,24) for i in self.occ] 
+ 
         self.sh_day = np.roll(self.sh_day,24)
         self.sh_night = np.roll(self.sh_night,24)
         self.sh_bath = np.roll(self.sh_bath,24)

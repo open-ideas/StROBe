@@ -58,7 +58,6 @@ def simulate_scenarios(n_scen, ndays):
         family.simulate(2013, ndays)
 
         # aggregate scenarios:
-        family.roundUp()
         elec[i, :] = family.P
         mDHW[i, :] = family.mDHW
 
