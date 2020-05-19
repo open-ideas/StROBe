@@ -108,10 +108,10 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 
 ## References
 
-1. Baetens, R., & Saelens, D. (2016). Modelling uncertainty in district energy simulations by stochastic residential occupant behaviour. *Journal of Building Performance Simulation*, 9(4), 431–447. https://doi.org/10.1080/19401493.2015.1070203
+1. Baetens, R., & Saelens, D. (2016). Modelling uncertainty in district energy simulations by stochastic residential occupant behaviour. *Journal of Building Performance Simulation*, 9(4), 431â€“447. https://doi.org/10.1080/19401493.2015.1070203
 2. Baetens, R. (2015). On externalities of heat pump based low-energy dwellings at the low-voltage distribution grid. Ph.D. thesis, Arenberg Doctoral School, KU Leuven. 
 
-Please cite IDEAS using the information below.
+Please cite **StROBe** using the information below.
 ```
 @article{Baetens2016,
 author = {Baetens, Ruben and Saelens, Dirk},
