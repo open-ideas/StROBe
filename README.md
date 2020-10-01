@@ -20,6 +20,11 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 
 ## Revision history
 
+**OCt 1, 2020**
+(See [pull request](https://github.com/open-ideas/StROBe/pull/33) for details.)
+
+- Fixed problem with wrong occupancy cluster selection, in [`Corpus/data.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/data.py#L33). Now all different occupancy patterns should be correctly represented.
+
 **May 8, 2020**
 (See [pull request](https://github.com/open-ideas/StROBe/pull/31) for details.)
 
