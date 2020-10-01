@@ -22,17 +22,6 @@ sys.path.append("..")
 from Data.Households import households
 from Data.Appliances import set_appliances
 
-#changes for new cold-appliance fix #######################################
-# Based on 10000 runs, these new values combined with rule-based fix (see in def appliances)
-# lead to the same overall ownership as the original values.
-# We change it here so that the original remain in the Appliances file.
-set_appliances['Refrigerator']['owner']=0.27     # original:  0.430
-set_appliances['FridgeFreezer']['owner']=0.40    # original:  0.651
-set_appliances['ChestFreezer']['owner']=0.19     # original:  0.163
-set_appliances['UprightFreezer']['owner']=0.31   # original:  0.291
-
-####################################################################
-
 class Household(object):
     '''
     The Household class is the main class of StROBe, defining the
@@ -94,6 +83,16 @@ class Household(object):
             '''
             # Loop through all appliances and pick randomly based on the
             # rate of ownership.
+            #changes for new cold-appliance fix #######################################
+            
+            # Based on 10000 runs, these new values combined with rule-based fix below
+            # lead to the same overall ownership as the original values.
+            # We change it here so that the original remain in the Appliances file.
+            set_appliances['Refrigerator']['owner']=0.27     # original:  0.430
+            set_appliances['FridgeFreezer']['owner']=0.40    # original:  0.651
+            set_appliances['ChestFreezer']['owner']=0.19     # original:  0.163
+            set_appliances['UprightFreezer']['owner']=0.31   # original:  0.291
+            
             app_n = []
             for app in set_appliances:
                 if set_appliances[app]['type'] == 'appliance':
