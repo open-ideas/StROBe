@@ -30,7 +30,7 @@ def get_clusters(employment, **kwargs):
         emp_i = order.index(employment)
         data = np.loadtxt('Crosstable_Employment_'+key+'.txt', float).T[emp_i]
         rnd = np.random.random()
-        cluster = stats.get_probability(rnd, data[1:], p_type='prob')
+        cluster = stats.get_probability(rnd, data, p_type='prob')
         cluDict.update({key:cluster})
     ##########################################################################
     # and return the final cluster id's

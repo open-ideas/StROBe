@@ -51,7 +51,7 @@ for j in range(rep):
     n.update({'QCon':0}) # annual convective internal heat gains in kWh
     
     for i in range(N):
-        if i in range(0,N,10) : print 'Test house '+str(i) + ' created'
+        print '##############################################Test house '+str(i) + ' created, repetition ' + str(j)
         test = residential.Household('Test_'+str(i))
         test.simulate()
 ###########  to save time & space, don't save individual simulation results       
