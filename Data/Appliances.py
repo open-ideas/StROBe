@@ -3,7 +3,7 @@ set_appliances = \
   "FridgeFreezer": {
     "frad": 0.46, 
     "cycle_power": 190, 
-    "cal": 0.05302278109276634, 
+    "cal": 0.05348400435732094, 
     "standby_power": 0, 
     "owner": 0.651, 
     "cycle_n": 6115.75932851014, 
@@ -18,7 +18,7 @@ set_appliances = \
   "Hob": {
     "frad": 0.3, 
     "cycle_power": 2400, 
-    "cal": 0.035719693342637734, 
+    "cal": 0.036523596330418226, 
     "standby_power": 1, 
     "owner": 0.463, 
     "cycle_n": 417.902007298679, 
@@ -48,7 +48,7 @@ set_appliances = \
   "DVD": {
     "frad": 0.92, 
     "cycle_power": 33.5521973529143, 
-    "cal": 0.05483103394785327, 
+    "cal": 0.055821331844623616, 
     "standby_power": 2, 
     "owner": 0.896, 
     "cycle_n": 1464.26653737683, 
@@ -63,7 +63,7 @@ set_appliances = \
   "Kettle": {
     "frad": 0.17, 
     "cycle_power": 2000, 
-    "cal": 0.004343036279384075, 
+    "cal": 0.004612679788676307, 
     "standby_power": 1, 
     "owner": 0.975, 
     "cycle_n": 1519.82286616642, 
@@ -78,7 +78,7 @@ set_appliances = \
   "Microwave": {
     "frad": 0, 
     "cycle_power": 1250, 
-    "cal": 0.0075533680233228475, 
+    "cal": 0.008013148873682017, 
     "standby_power": 2, 
     "owner": 0.859, 
     "cycle_n": 94.619322407248, 
@@ -93,7 +93,7 @@ set_appliances = \
   "HiFi": {
     "frad": 0.5, 
     "cycle_power": 100, 
-    "cal": 0.0076866474619492284, 
+    "cal": 0.008005019574356842, 
     "standby_power": 9, 
     "owner": 0.9, 
     "cycle_n": 109.425544999843, 
@@ -107,7 +107,7 @@ set_appliances = \
   }, 
   "bathFlow": {
     "cycle_length": 10, 
-    "cal": 0.013959890338716127, 
+    "cal": 0.01447147553646071, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "shower", 
@@ -118,7 +118,7 @@ set_appliances = \
   "ChestFreezer": {
     "frad": 0.46, 
     "cycle_power": 190, 
-    "cal": 0.06346681125456163, 
+    "cal": 0.06627085372080074, 
     "standby_power": 0, 
     "owner": 0.163, 
     "cycle_n": 6115.75932851014, 
@@ -133,7 +133,7 @@ set_appliances = \
   "Fax": {
     "frad": 0.5, 
     "cycle_power": 37, 
-    "cal": 0.0005413938298533963, 
+    "cal": 0.0005869916079454653, 
     "standby_power": 3, 
     "owner": 0.2, 
     "cycle_n": 197.123588348433, 
@@ -148,7 +148,7 @@ set_appliances = \
   "Printer": {
     "frad": 0.67, 
     "cycle_power": 335.2, 
-    "cal": 0.05980888943100479, 
+    "cal": 0.06347513729112045, 
     "standby_power": 4, 
     "owner": 0.665, 
     "cycle_n": 654.875958011369, 
@@ -163,7 +163,7 @@ set_appliances = \
   "PC": {
     "frad": 0.92, 
     "cycle_power": 140.7, 
-    "cal": 0.07499926963830043, 
+    "cal": 0.08083397129113995, 
     "standby_power": 5, 
     "owner": 0.708, 
     "cycle_n": 449.237984776012, 
@@ -193,7 +193,7 @@ set_appliances = \
   "WasherDryer": {
     "frad": 0.0, 
     "cycle_power": 792.034786057663, 
-    "cal": 0.2887586611722148, 
+    "cal": 0.28709666854255933, 
     "standby_power": 1, 
     "owner": 0.153, 
     "cycle_n": 195.906595865545, 
@@ -208,7 +208,7 @@ set_appliances = \
   "UprightFreezer": {
     "frad": 0.46, 
     "cycle_power": 155, 
-    "cal": 0.0436450754889704, 
+    "cal": 0.04577208372652669, 
     "standby_power": 0, 
     "owner": 0.291, 
     "cycle_n": 6115.75932851014, 
@@ -223,7 +223,7 @@ set_appliances = \
   "Vacuum": {
     "frad": 0.5, 
     "cycle_power": 2000, 
-    "cal": 0.13664095138921212, 
+    "cal": 0.14321421339450868, 
     "standby_power": 0, 
     "owner": 0.937, 
     "cycle_n": 110.367597918536, 
@@ -238,7 +238,7 @@ set_appliances = \
   "Refrigerator": {
     "frad": 0.46, 
     "cycle_power": 110, 
-    "cal": 0.03385193315361484, 
+    "cal": 0.035861772069934156, 
     "standby_power": 0, 
     "owner": 0.43, 
     "cycle_n": 6115.75932851014, 
@@ -252,7 +252,7 @@ set_appliances = \
   }, 
   "shortFlow": {
     "cycle_length": 1, 
-    "cal": 0.04098810282302966, 
+    "cal": 0.042562311913397724, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "Presence", 
@@ -263,7 +263,7 @@ set_appliances = \
   "TV1": {
     "frad": 0.65, 
     "cycle_power": 124, 
-    "cal": 0.05468163455408799, 
+    "cal": 0.056168679073161205, 
     "standby_power": 3, 
     "owner": 0.977, 
     "cycle_n": 1464.26653737683, 
@@ -278,7 +278,7 @@ set_appliances = \
   "MusicPlayer": {
     "frad": 0.5, 
     "cycle_power": 15, 
-    "cal": 0.12567928463364575, 
+    "cal": 0.1298248939973467, 
     "standby_power": 2, 
     "owner": 0.9, 
     "cycle_n": 1212.76285809679, 
@@ -293,7 +293,7 @@ set_appliances = \
   "TV3": {
     "frad": 0.65, 
     "cycle_power": 124, 
-    "cal": 0.05511285694231206, 
+    "cal": 0.06283000905624272, 
     "standby_power": 2, 
     "owner": 0.18, 
     "cycle_n": 1521.49596625218, 
@@ -308,7 +308,7 @@ set_appliances = \
   "TV2": {
     "frad": 0.65, 
     "cycle_power": 124, 
-    "cal": 0.05384932384140438, 
+    "cal": 0.055739364679278376, 
     "standby_power": 3, 
     "owner": 0.58, 
     "cycle_n": 1464.26653737683, 
@@ -322,7 +322,7 @@ set_appliances = \
   }, 
   "mediumFlow": {
     "cycle_length": 1, 
-    "cal": 0.01712974547614407, 
+    "cal": 0.017810482681251995, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "Presence", 
@@ -333,7 +333,7 @@ set_appliances = \
   "Iron": {
     "frad": 0.5, 
     "cycle_power": 1000, 
-    "cal": 0.009365414670544862, 
+    "cal": 0.009646339097045481, 
     "standby_power": 0, 
     "owner": 0.9, 
     "cycle_n": 35.4594692107747, 
@@ -348,7 +348,7 @@ set_appliances = \
   "TumbleDryer": {
     "frad": 0.0, 
     "cycle_power": 2500, 
-    "cal": 0.4932231780194472, 
+    "cal": 0.49474492492582306, 
     "standby_power": 1, 
     "owner": 0.416, 
     "cycle_n": 122.072915738278, 
@@ -363,7 +363,7 @@ set_appliances = \
   "DishWasher": {
     "frad": 0.0, 
     "cycle_power": 1130.61224489796, 
-    "cal": 0.045701393607434415, 
+    "cal": 0.04603964569480809, 
     "standby_power": 0, 
     "owner": 0.335, 
     "cycle_n": 241.476395726831, 
@@ -378,7 +378,7 @@ set_appliances = \
   "TVReceiver": {
     "frad": 0.92, 
     "cycle_power": 26.8237423726735, 
-    "cal": 0.0548252897719791, 
+    "cal": 0.05635113292276207, 
     "standby_power": 15, 
     "owner": 0.934, 
     "cycle_n": 1464.26653737683, 
@@ -392,7 +392,7 @@ set_appliances = \
   }, 
   "showerFlow": {
     "cycle_length": 5, 
-    "cal": 0.01979471557132772, 
+    "cal": 0.0204493968188275, 
     "owner": 0.0, 
     "standby_flow": 0, 
     "activity": "shower", 
@@ -403,7 +403,7 @@ set_appliances = \
   "WashingMachine": {
     "frad": 0.0, 
     "cycle_power": 405.54347826087, 
-    "cal": 0.2523055679005739, 
+    "cal": 0.2632287603579244, 
     "standby_power": 1, 
     "owner": 0.781, 
     "cycle_n": 195.906595865545, 
@@ -418,7 +418,7 @@ set_appliances = \
   "Oven": {
     "frad": 0.17, 
     "cycle_power": 2125, 
-    "cal": 0.01809465246066292, 
+    "cal": 0.019262659189245385, 
     "standby_power": 3, 
     "owner": 0.616, 
     "cycle_n": 219.792801008503, 

@@ -20,7 +20,14 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 
 ## Revision history
 
-**OCt 1, 2020**
+**Oct 22, 2020**
+(See [pull request](https://github.com/open-ideas/StROBe/pull/35) for details.)
+
+- Changed occupancy generation in [`Corpus/residentia.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/residential.py). Now a typical week is created with all different days (previously all weekdays were the same), which is then copied for the year.
+- Changed way 4h shift is implemented. One extra day is simulated in the front, of which 20 hours are then cut, so that the data starts at midnight of the first day of the year. The last 4h are also cut. This replaces a previous [solution](https://github.com/open-ideas/StROBe/pull/10)  which took the last 4h of the year and put them in the front.
+- Other minor fixes.
+
+**Oct 9, 2020**
 (See [pull request](https://github.com/open-ideas/StROBe/pull/33) for details.)
 
 - Fixed problem with wrong occupancy cluster selection, in [`Corpus/data.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/data.py#L33). Now all different occupancy patterns should be correctly represented.
@@ -95,7 +102,7 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 **Jun 15, 2018**
 (See [pull request](https://github.com/open-ideas/StROBe/pull/10) for details.)
 
-- Brought last 4 h of resulting time series to the front so that data starts at midnight instead of 4am (which is when the survey statistics begin). This is applied in the `roundUp()` function of [`Corpus/residential.py`](https://github.com/open-ideas/StROBe/blob/63da1fc06db9ebe683a69b879436104f1ffdfa11/Corpus/residential.py#L572-L581).
+- Brought last 4h of resulting time series to the front so that data starts at midnight instead of 4am (which is when the survey statistics begin). This is applied in the `roundUp()` function of [`Corpus/residential.py`](https://github.com/open-ideas/StROBe/blob/63da1fc06db9ebe683a69b879436104f1ffdfa11/Corpus/residential.py#L572-L581).
 - Updated [`Corpus/__calibrate__.py`](https://github.com/open-ideas/StROBe/blob/master/Corpus/__calibrate__.py) file to perform automatically the calibration of `cal` values of appliances, and added check for annual electricity load.
 
 **Sep 28, 2017**
@@ -110,6 +117,14 @@ In [example.py](https://github.com/open-ideas/StROBe/blob/master/example.py) you
 - Fixed the generation of lighting loads, that was on when asleep or away.
 - Fixed the selection of appliances, which selected only less probable devices.
 - Updated paths, data importation and initialization files.
+
+**Mar 13, 2014** 
+
+- First full working version. See [repository](https://github.com/open-ideas/StROBe/tree/84921ca49841b40de53273ed08cbf0f49f849e41) at that point.
+
+**Oct 1, 2013** 
+
+- Initial commit.
 
 ## References
 

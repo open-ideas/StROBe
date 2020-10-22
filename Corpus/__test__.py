@@ -12,7 +12,8 @@ import feeder
 import cPickle
 
 DIR = os.path.dirname(os.path.realpath(__file__))
-os.chdir(os.path.dirname(DIR)+'\\Data')
+path=os.path.dirname(DIR)+'\\Data'
+os.chdir(path)
 
 class EquipmentTest(unittest.TestCase):
     '''
@@ -32,7 +33,7 @@ class HouseholdTest(unittest.TestCase):
         self.assertEqual(test.name, self.name)
         self.assertTrue(len(test.apps)!=0)
         self.assertTrue(len(test.members)!=0)
-        self.assertTrue(len(test.clusters)!=0)
+        self.assertTrue(len(test.clustersList)!=0)
         print '\n'
 
     def test_creation_2(self):
@@ -40,7 +41,7 @@ class HouseholdTest(unittest.TestCase):
         self.assertEqual(test.name, self.name)
         self.assertTrue(len(test.apps)!=0)
         self.assertTrue(len(test.members)!=0)
-        self.assertTrue(len(test.clusters)!=0)
+        self.assertTrue(len(test.clustersList)!=0)
         print '\n'
         
     def test_simulation(self):
@@ -66,7 +67,7 @@ class FeederTest(unittest.TestCase):
         self.name = 'Example'
         
     def test_creation1(self):
-        test = feeder.IDEAS_Feeder(self.name, 2, r'E:\3_PhD\6_Python\Test')
+        test = feeder.IDEAS_Feeder(self.name, 2, path)
         self.assertEqual(test.name, self.name)
         print '\n'
 
